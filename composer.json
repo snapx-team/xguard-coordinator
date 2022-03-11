@@ -1,0 +1,28 @@
+{
+    "name": "xguard/xguard-coordinator",
+    "description": "A plugin to manage supervisors on the XGuard ERP",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Siamak Samie",
+            "email": "siamak.samie@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Xguard\\Coordinator\\": "src/"
+        }
+    },
+
+    "extra": {
+        "laravel": {
+            "providers": [
+              "Xguard\\Coordinator\\CoordinatorServiceProvider"
+            ]
+        }
+    }
+
+}

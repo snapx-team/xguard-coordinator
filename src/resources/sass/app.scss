@@ -1,0 +1,77 @@
+
+@import "~tailwindcss";
+@import '~vue2-datepicker/index.css';
+
+// vue select overrides
+
+.vs__dropdown-toggle {
+    min-height: 50px;
+    margin-top: 8px;
+    flex-flow: wrap;
+    background: white !important;
+}
+
+.vs__selected {
+    padding: 0 0.45em;
+}
+
+.vs__selected-options {
+    display: contents !important;
+}
+
+.vs__deselect {
+    margin-left: 5px;
+    padding-top: 1px;
+}
+
+// vue date picker overrides
+
+.mx-datepicker {
+    width: 100%;
+}
+
+.mx-input {
+    min-height: 50px;
+    min-width: 200px;
+}
+
+// quill overrides
+
+.ql-editor {
+    height: auto !important;
+}
+
+.ql-editor ul[data-checked=false] > li::before {
+    content: '\2610'!important;
+}
+
+.ql-editor ul[data-checked=true] > li::before {
+    content: '\2612'!important;
+}
+
+.ql-editor ul[data-checked=true] > li {
+    text-decoration: line-through;
+}
+
+.ql-editor ul > li {
+    padding: 10px 5px;
+    border-bottom: 1px solid lightgray;
+}
+
+.ql-editor ul {
+    border-left: 5px solid #6366f1;
+}
+.ql-editor li:not(.ql-direction-rtl)::before{
+    direction: ltr;
+}
+
+#task-description {
+    padding: 0px !important;
+}
+
+// filepond style
+
+.filepond--fullsize-overlay{
+    z-index: 10000 !important;
+    position: fixed !important;
+}
