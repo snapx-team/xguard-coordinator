@@ -56,7 +56,6 @@ jobs: # a collection of steps
       # Run unit tests
       - run:
           name: "Run Tests in Parallel"
-          command: |
-            cd ~/xguard-schedule && phpdbg -d memory_limit=64G -qrr vendor/bin/paratest -p4 packages/xguard-coordinator/tests
+          command: cd ~/xguard-schedule && phpdbg -d memory_limit=64G -qrr vendor/bin/paratest -p4 packages/xguard-coordinator/tests
 
 
