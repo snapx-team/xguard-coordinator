@@ -8,7 +8,7 @@ jobs: # a collection of steps
       - image: circleci/php:7.4-node-browsers
       #- image: circleci/mysql:5.7
     resource_class: medium
-    parallelism: 4
+    parallelism: 2
     working_directory: ~/coordinator
 
     steps:
@@ -50,6 +50,7 @@ jobs: # a collection of steps
       # Create and move coordinator plugin into the xguard-schedule/packages/xguard-coordinator/ directory
       - run: cd ~/xguard-schedule && sudo mkdir packages
       - run: cd ~/xguard-schedule/packages && sudo mkdir xguard-coordinator
+      - run: sudo rm -r ~/xguard-schedule/vendor/xguard/xguard-coordinator/*
       - run: cd .. && sudo cp -r ~/coordinator/* ~/xguard-schedule/packages/xguard-coordinator/
       - run: cd .. && sudo cp -r ~/coordinator/* ~/xguard-schedule/vendor/xguard/xguard-coordinator/
 
@@ -57,6 +58,6 @@ jobs: # a collection of steps
       - run:
           name: "Run Tests in Parallel"
           command: |
-            cd ~/xguard-schedule && phpdbg -d memory_limit=64G -qrr vendor/bin/paratest -p4 packages/xguard-coordinator/tests
+            cd ~/xguard-schedule && phpdbg -d memory_limit=64G -qrr vendor/bin/paratest -p2 packages/xguard-coordinator/tests
 
 
