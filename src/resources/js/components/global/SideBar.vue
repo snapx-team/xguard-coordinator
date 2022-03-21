@@ -79,7 +79,6 @@
 import Avatar from "../global/Avatar.vue";
 
 export default {
-    inject: ["eventHub"],
 
     components: {
         Avatar,

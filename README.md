@@ -22,7 +22,7 @@ You can now go to the **/coordinator** path to use the package. You must first l
 
 <br>
 
-## Develpment 
+## Development 
 
 **Follow these steps to make modifications to the package**
 
@@ -78,4 +78,8 @@ php artisan migrate --path=package/xguard-coordinator/src/database/migrations
 php artisan db:seed --class="Xguard\Coordinator\database\seeds\EmployeeSeeder"
 ```
 
+**9:** 
+```bash
+php artisan coordinator-app:create-admin
+```
 <br>

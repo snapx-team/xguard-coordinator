@@ -54,10 +54,25 @@ jobs: # a collection of steps
       - run: cd .. && sudo cp -r ~/coordinator/* ~/xguard-schedule/packages/xguard-coordinator/
       - run: cd .. && sudo cp -r ~/coordinator/* ~/xguard-schedule/vendor/xguard/xguard-coordinator/
 
-      # Run unit tests
+      # Run php unit tests
       - run:
           name: "Run Tests in Parallel"
           command: |
             cd ~/xguard-schedule && phpdbg -d memory_limit=64G -qrr vendor/bin/paratest -p2 packages/xguard-coordinator/tests
+
+      #Jest
+
+      - run:
+          name: "install dependencies"
+          command: |
+            cd ~/xguard-schedule/packages/xguard-coordinator && sudo npm install
+
+
+      - run:
+          name: "Run Frontend Jest Tests"
+          command: |
+            cd ~/xguard-schedule/packages/xguard-coordinator && sudo npm test
+
+
 
 

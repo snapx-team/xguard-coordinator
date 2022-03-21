@@ -25,7 +25,11 @@
 </template>
 
 <script>
+
+import {eventNames} from "../../../enums/eventNames";
+
 export default {
+
     inject: ["eventHub"],
 
     props: {
@@ -36,7 +40,7 @@ export default {
     },
     methods: {
         createCoordinators() {
-            this.eventHub.$emit("create-coordinators");
+            this.eventHub.$emit(eventNames.createCoordinators);
         },
     },
 };
