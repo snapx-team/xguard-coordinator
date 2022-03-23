@@ -14,10 +14,7 @@ class GetAdminPageDataAction extends Action
 
     public function authorize(): bool
     {
-        if (session(SessionVariables::ROLE()->getValue()) ===  Roles::ADMIN()->getValue()) {
-            return true;
-        }
-        return false;
+        return (session(SessionVariables::ROLE()->getValue()) ===  Roles::ADMIN()->getValue());
     }
 
     public function handle(): array

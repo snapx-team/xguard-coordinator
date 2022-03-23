@@ -18,7 +18,6 @@
 import {helperFunctions} from "../../mixins/helperFunctionsMixin";
 
 export default {
-    inject: ["eventHub"],
     mixins: [helperFunctions],
 
     watch: {

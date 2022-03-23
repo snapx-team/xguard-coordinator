@@ -21,9 +21,11 @@ class CoordinatorController extends Controller
                 "role" => $coordinatorData['role'],
             ])->run();
         } catch (\Exception $e) {
-            return new JsonResponse([], $e->getCode(), $e->getMessage());
+            return response([
+                'success' => 'false',
+                'message' => $e->getMessage(),
+            ], 400);
         }
-        return response();
     }
 
     public function deleteCoordinator($id)
@@ -33,9 +35,11 @@ class CoordinatorController extends Controller
                 'coordinatorId' => $id
             ])->run();
         } catch (\Exception $e) {
-            return new JsonResponse([], $e->getCode(), $e->getMessage());
+            return response([
+                'success' => 'false',
+                'message' => $e->getMessage(),
+            ], 400);
         }
-        return response();
     }
 
     public function getCoordinators()

@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <!-- Container -->
-                    <form class="space-y-6 overflow-auto px-8 py-6">
+                    <div class="space-y-6 overflow-auto px-8 py-6">
                         <div class="flex space-x-3">
                             <div class="space-y-2 flex-1">
 
@@ -123,20 +123,20 @@
                                     type="button">
                                 Cancel
                             </button>
-                            <button @click="saveCoordinators($event)"
+                            <button @click="saveCoordinators()"
                                     class="px-4 py-3 border border-transparent rounded text-white bg-indigo-600 hover:bg-indigo-500 transition duration-300 ease-in-out"
                                     type="button">
                                 <span v-if="isEdit">Edit Coordinator</span>
                                 <span v-else>Create Coordinator</span>
                             </button>
                         </div>
-                        <button @click="deleteCoordinator($event)"
+                        <button @click="deleteCoordinator()"
                                 class="mt-4  text-sm text-red-600 hover:text-red-800 transition duration-300 ease-in-out focus:outline-none"
                                 v-if="isEdit">
                             <i class="fas fa-trash mr-2"></i>
                             Delete Coordinator
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </transition>
@@ -146,6 +146,7 @@
 import vSelect from "vue-select";
 import Avatar from "../../global/Avatar";
 import {axiosCalls} from "../../../mixins/axiosCallsMixin";
+import {eventNames} from "../../../enums/eventNames";
 import _ from 'lodash';
 
 export default {
@@ -173,7 +174,7 @@ export default {
     },
 
     created() {
-        this.eventHub.$on("create-coordinators", (coordinator) => {
+        this.eventHub.$on(eventNames.createCoordinators, (coordinator) => {
             if (coordinator !== undefined) {
                 this.coordinatorData.role = coordinator.role;
                 this.coordinatorData.id = coordinator.id;
@@ -192,7 +193,7 @@ export default {
     },
 
     beforeDestroy() {
-        this.eventHub.$off('create-coordinators');
+        this.eventHub.$off(eventNames.createCoordinators);
     },
 
     mounted() {
@@ -202,26 +203,28 @@ export default {
     },
 
     methods: {
-        saveCoordinators(event) {
+
+        saveCoordinators() {
             if (this.coordinatorData.selectedUsers) {
-                event.target.disabled = true;
                 this.eventHub.$emit("save-coordinators", this.coordinatorData);
                 this.modalOpen = false;
             } else {
                 this.triggerErrorToast('You need to select a user');
             }
         },
-        deleteCoordinator(event) {
-            event.target.disabled = true;
+
+        deleteCoordinator() {
             this.eventHub.$emit("delete-coordinator", this.coordinatorData.id);
             this.modalOpen = false;
         },
+
         onType(search, loading) {
             if (search.length) {
                 loading(true);
                 this.type(search, loading, this);
             }
         },
+
         type: _.debounce(function (search, loading, vm) {
             this.asyncGetSomeUsers(search).then((data) => {
                 this.allUsers = data.data;

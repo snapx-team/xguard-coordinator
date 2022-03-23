@@ -87,6 +87,7 @@ Vue.mixin({
         }
     }
 });
+
 new Vue({
     router,
     mounted() {
@@ -100,5 +101,3 @@ new Vue({
     },
     render: (h) => h(App)
 }).$mount('#app');
-
-

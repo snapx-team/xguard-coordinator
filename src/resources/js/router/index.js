@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Dashboard from '../components/dashboard/Dashboard';
 import UserProfile from '../components/users/UserProfile';
-import Admin from '../components/admin/admin';
+import Admin from '../components/admin/Admin';
 
 Vue.use(Router);
 
