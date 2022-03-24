@@ -40,6 +40,7 @@ class CoordinatorServiceProvider extends ServiceProvider
         $this->commands([CreateAdmin::class]);
 
         include __DIR__.'/routes/web.php';
+        include __DIR__.'/routes/api.php';
 
         $this->publishes([
             __DIR__.'/../public' => public_path('vendor/xguard-coordinator'),

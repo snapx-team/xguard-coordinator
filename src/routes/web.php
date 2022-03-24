@@ -1,6 +1,6 @@
 <?php
 
-Route::group(['prefix' => 'coordinator',], function () {
+Route::group(['prefix' => 'coordinator', 'as' => 'coordinator'], function () {
     Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function () {
 
         Route::group(['middleware' => ['web']], function () {
@@ -35,13 +35,5 @@ Route::group(['prefix' => 'coordinator',], function () {
                 Route::get('/get-some-contracts/{searchTerm}', 'ErpController@getSomeContracts');
             });
         });
-    });
-});
-
-// API
-
-Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function () {
-    Route::group(['prefix' => 'coordinator',], function () {
-        // api routes
     });
 });
