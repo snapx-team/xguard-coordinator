@@ -21,7 +21,7 @@ import device from 'vue-device-detector';
 import VueObserveVisibility from 'vue-observe-visibility';
 import * as VueMenu from '@hscmap/vue-menu';
 import VueCrontab from 'vue-crontab';
-
+import * as VueGoogleMaps from 'vue2-google-maps';
 
 //All file uploader imports
 
@@ -61,6 +61,12 @@ Vue.use(device);
 Vue.use(VueObserveVisibility);
 Vue.use(VueMenu);
 Vue.use(VueCrontab);
+Vue.use(VueGoogleMaps, {
+    load: {
+        key: ''
+    }
+});
+
 
 
 let globalData = new Vue({
