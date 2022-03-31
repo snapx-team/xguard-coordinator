@@ -14,7 +14,7 @@ class CreateJobSiteVisitsTable extends Migration
             $table->foreignId('job_site_id')->constrained()->cascadeOnUpdate();
             $table->foreignId('supervisor_shift_id')->constrained()->cascadeOnUpdate()->on('sa_supervisor_shifts');
             $table->date('start_time');
-            $table->date('end_time');
+            $table->date('end_time')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

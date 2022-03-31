@@ -21,7 +21,7 @@ class SupervisorShiftController extends Controller
         return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
     }
 
-    public function update(Request $request): \Illuminate\Http\Response
+    public function update(SupervisorShiftRequest $request): \Illuminate\Http\Response
     {
         $shift = SupervisorShift::find($request->id);
         $shift->fill([SupervisorShift::END_TIME => $request->end_time,])->save();
