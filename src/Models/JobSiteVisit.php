@@ -13,10 +13,20 @@ class JobSiteVisit extends Model
 {
     use HasFactory, SoftDeletes, CascadeSoftDeletes;
 
+    const ID = 'id';
+    const JOB_SITE_ID = 'job_site_id';
+    const SUPERVISOR_SHIFT_ID = 'supervisor_shift_id';
+    const START_TIME = 'start_time';
+    const END_TIME = 'end_time';
+
     protected $dates = ['deleted_at'];
     protected $table = 'sa_job_site_visits';
-    protected $guarded = [];
-
+    protected $fillable = [
+        self::SUPERVISOR_SHIFT_ID,
+        self::JOB_SITE_ID,
+        self::START_TIME,
+        self::END_TIME
+    ];
     public function jobSite(): BelongsTo
     {
         return $this->belongsTo(JobSite::class);

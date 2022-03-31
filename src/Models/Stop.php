@@ -12,6 +12,12 @@ class Stop extends Model
 {
     use HasFactory, SoftDeletes, CascadeSoftDeletes;
 
+    const ID = "id";
+    const SUPERVISOR_SHIFT_ID = 'supervisor_shift_id';
+    const START_TIME = 'start_time';
+    const END_TIME = 'end_time';
+    const LOCATION = 'location';
+
     protected $dates = ['deleted_at'];
     protected $table = 'sa_stops';
     protected $guarded = [];

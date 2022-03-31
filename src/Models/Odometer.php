@@ -12,6 +12,11 @@ class Odometer extends Model
 {
     use HasFactory, SoftDeletes, CascadeSoftDeletes;
 
+    const ID = "id";
+    const SUPERVISOR_SHIFT_ID = 'supervisor_shift_id';
+    const START_ODOMETER = 'start_odometer';
+    const END_ODOMETER = 'end_odometer';
+
     protected $dates = ['deleted_at'];
     protected $table = 'sa_odometers';
     protected $fillable = [
@@ -19,11 +24,6 @@ class Odometer extends Model
         self::START_ODOMETER,
         self::END_ODOMETER
     ];
-
-    const ID = "id";
-    const SUPERVISOR_SHIFT_ID = 'supervisor_shift_id';
-    const START_ODOMETER = 'start_odometer';
-    const END_ODOMETER = 'end_odometer';
 
     public function supervisorShift(): BelongsTo
     {
