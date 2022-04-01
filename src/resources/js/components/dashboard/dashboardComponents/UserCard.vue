@@ -6,11 +6,8 @@
                 <p class="font-semibold text-sm">{{ user.name }}</p>
                 <small class="text-gray-400 text-xs">{{ user.email }}</small>
             </div>
-
         </div>
-
         <i class="fa fa-caret-right ml-2"></i>
-
     </li>
 </template>
 <script>

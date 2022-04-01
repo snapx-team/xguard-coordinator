@@ -8,10 +8,6 @@
 
         <div class="mx-10 my-3 space-y-5 shadow-xl p-5 bg-white">
 
-
-            <!--  NEW LOGIC STARTS HERE YO!  -->
-
-
             <!-- date filter -->
             <div class="flex flex-wrap bg-gray-50 p-4 rounded">
                 <div class="flex-column w-80 mr-2 ">
@@ -254,18 +250,16 @@ export default {
         },
         openWindow(marker, idx) {
             this.showDataPane = true;
-
-
             this.infoPosition = this.getPosition(marker);
             this.infoOptions.content =
                 '<div class="">' +
                 '<p class="font-semibold">' +
                 marker.name +
-                "</p>" +
+                '</p>' +
                 '<p class="">' +
                 marker.address +
-                "</p>" +
-                "</div>";
+                '</p>' +
+                '</div>';
 
             if (this.currentMidx === idx) {
                 this.window_open = !this.window_open;
