@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Xguard\Coordinator\Actions\AdminPageData\GetAdminPageDataAction;
+use Xguard\Coordinator\Actions\Supervisors\GetSupervisorsDataAction;
 use Xguard\Coordinator\Enums\SessionVariables;
 use Xguard\Coordinator\Models\Coordinator;
 use Xguard\Coordinator\Actions\CoordinatorProfileData\GetCoordinatorProfileAction;
@@ -50,15 +51,6 @@ class AppController extends Controller
     {
         try {
             return app(GetAdminPageDataAction::class)->run();
-        } catch (\Exception $e) {
-            return new JsonResponse([], $e->getCode(), $e->getMessage());
-        }
-    }
-
-    public function getDashboardData()
-    {
-        try {
-            return app(GetDashbaordDataAction::class)->run();
         } catch (\Exception $e) {
             return new JsonResponse([], $e->getCode(), $e->getMessage());
         }

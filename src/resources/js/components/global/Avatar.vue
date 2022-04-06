@@ -1,6 +1,6 @@
 <template>
     <div
-        :class="`w-${size} h-${size} border-${borderSize} border-${borderColor} ${borderSize=== 0 ? 'border' : ''}`"
+        :class="`w-${size} h-${size} border-${borderSize} border-${borderColor}-600 ${borderSize=== 0 ? 'border' : ''}`"
         class="rounded-full inline relative flex flex-col items-center group"
         :style="`background-color:#${backgroundColor}`">
         <div :class="`mt-${size}`"

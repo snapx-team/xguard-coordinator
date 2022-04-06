@@ -19,9 +19,11 @@ Route::group(['prefix' => 'coordinator', 'as' => 'coordinator'], function () {
                 // Coordinator App Data
                 Route::get('/get-role-and-coordinator-id', 'AppController@getRoleAndCoordinatorId');
                 Route::get('/get-admin-page-data', 'AppController@getAdminPageData');
-                Route::get('/get-dashboard-data', 'AppController@getAdminPageData');
                 Route::get('/get-coordinator-profile', 'AppController@getCoordinatorProfile');
                 Route::get('/get-footer-info', 'AppController@getFooterInfo');
+
+                // Supervisors
+                Route::get('/get-supervisors-data', 'SupervisorController@getSupervisorsData');
 
                 // Coordinators
                 Route::post('/create-coordinators', 'CoordinatorController@createCoordinators');

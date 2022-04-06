@@ -1,10 +1,11 @@
 <?php
 
-
-Route::group(['prefix' => 'api/coordinator', 'as' => 'coordinator'], function () {
-    Route::post('login', 'Auth\LoginController@apiLogin');
+Route::group(['namespace' => 'App\Http\Controllers',], function () {
+    Route::group(['prefix' => 'api/coordinator', 'as' => 'coordinator'], function () {
+        Route::post('login', 'Auth\LoginController@apiLogin');
+        Route::post('forgot', 'Auth\ForgotPasswordController@apiSendResetLinkEmail');
+    });
 });
-
 
 Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function () {
     Route::group(['prefix' => 'api/coordinator', 'as' => 'coordinator'], function () {

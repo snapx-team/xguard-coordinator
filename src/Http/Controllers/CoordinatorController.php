@@ -3,7 +3,6 @@
 namespace Xguard\Coordinator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Responses\JsonResponse;
 use Illuminate\Http\Request;
 use Xguard\Coordinator\Models\Coordinator;
 use Xguard\Coordinator\Actions\Coordinators\CreateOrUpdateCoordinatorAction;

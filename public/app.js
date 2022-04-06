@@ -7496,11 +7496,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   mixins: [_mixins_axiosCallsMixin__WEBPACK_IMPORTED_MODULE_0__["axiosCalls"]],
   mounted: function mounted() {
-    this.getDashboardData();
+    this.getSupervisorsData();
   },
   data: function data() {
     return {
-      dashboardData: null,
+      supervisorsData: null,
+      jobSiteMarkers: [],
       selectedDate: new Date(),
       showSupervisorPane: true,
       showDataPane: false,
@@ -7528,88 +7529,38 @@ __webpack_require__.r(__webpack_exports__);
         content: null
       },
       window_open: false,
-      currentMidx: null,
-      users: [{
-        id: 1,
-        name: 'siamak Samie',
-        email: 'siamak.samie@gmail.com'
-      }, {
-        id: 2,
-        name: 'siamak A',
-        email: 'siamak.a@gmail.com'
-      }, {
-        id: 3,
-        name: 'siamak B',
-        email: 'siamak.b@gmail.com'
-      }, {
-        id: 4,
-        name: 'siamak C',
-        email: 'siamak.c@gmail.com'
-      }],
-      jobSites: [{
-        "name": "Location 1",
-        "address": "215 West Girard Avenue 19123",
-        "location": {
-          "lat": 39.9695601,
-          "lon": -75.1395161
-        },
-        "label": "1"
-      }, {
-        "name": "Location 2",
-        "address": "5360 Old York Road 19141",
-        "location": {
-          "lat": 40.034038,
-          "lon": -75.145223
-        },
-        "label": "2"
-      }, {
-        "name": "Location 3",
-        "address": "1350 W Girard Avenue 19123",
-        "location": {
-          "lat": 39.9713524,
-          "lon": -75.159036
-        },
-        "label": "3"
-      }]
+      currentMidx: null
     };
   },
   computed: {
-    google: vue2_google_maps__WEBPACK_IMPORTED_MODULE_6__["gmapApi"],
-    jobSiteMarkers: function jobSiteMarkers() {
-      return this.jobSites.map(function (_ref) {
-        var label = _ref.label,
-            _ref$location = _ref.location,
-            lat = _ref$location.lat,
-            lon = _ref$location.lon,
-            name = _ref.name,
-            address = _ref.address;
-        return {
-          label: {
-            text: label,
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: "16px"
-          },
-          position: {
-            lat: lat,
-            lng: lon
-          },
-          name: name,
-          address: address
-        };
-      });
-    }
+    google: vue2_google_maps__WEBPACK_IMPORTED_MODULE_6__["gmapApi"]
   },
   methods: {
-    getDashboardData: function getDashboardData() {
+    getSupervisorsData: function getSupervisorsData() {
       var _this = this;
 
       this.eventHub.$emit("set-loading-state", true);
-      this.asyncGetDashboardData().then(function (data) {
-        _this.dashboardData = data.data;
+      this.asyncGetSupervisorsData().then(function (data) {
+        _this.supervisorsData = data.data.supervisorsData;
 
         _this.eventHub.$emit("set-loading-state", false);
       });
+    },
+    setJobSiteMarkers: function setJobSiteMarkers() {//TODO: format this with supervisorsData
+      // return this.supervisorsData.jobSites.map(({label, location: {lat, lon}, name, address}) => ({
+      //     label: {
+      //         text: label,
+      //         color: "#fff",
+      //         fontWeight: "bold",
+      //         fontSize: "16px",
+      //     },
+      //     position: {
+      //         lat,
+      //         lng: lon,
+      //     },
+      //     name,
+      //     address
+      // }));
     },
     getPosition: function getPosition(marker) {
       return {
@@ -7694,17 +7645,28 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     Avatar: _global_Avatar__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   props: {
-    user: {
+    supervisor: {
       type: Object,
       "default": function _default() {
         return {};
       }
+    }
+  },
+  computed: {
+    isActive: function isActive() {
+      return this.supervisor.supervisorShifts.some(function (e) {
+        return e.isActive;
+      });
     }
   }
 });
@@ -8228,7 +8190,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n#map[data-v-0617fb13] {\r\n    height: 500px;\r\n    width: 100%;\r\n    margin: 0 auto;\n}\n.list-inline-item[data-v-0617fb13] {\r\n    cursor: pointer;\n}\r\n", ""]);
+exports.push([module.i, "\n#map[data-v-0617fb13] {\n    height: 600px;\n    width: 100%;\n    margin: 0 auto;\n}\n.list-inline-item[data-v-0617fb13] {\n    cursor: pointer;\n}\n", ""]);
 
 // exports
 
@@ -8247,7 +8209,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n.group:hover .group-hover\\:flex[data-v-bb806982] {\r\n    display: flex;\n}\r\n", ""]);
+exports.push([module.i, "\n.group:hover .group-hover\\:flex[data-v-bb806982] {\n    display: flex;\n}\n", ""]);
 
 // exports
 
@@ -37207,7 +37169,7 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm.dashboardData !== null
+  return _vm.supervisorsData !== null
     ? _c("div", [
         _c("div", {
           staticClass: "bg-gray-100 w-full h-64 absolute top-0 rounded-b-lg",
@@ -37353,18 +37315,24 @@ var render = function () {
                                   _vm._v(" "),
                                   _c(
                                     "div",
-                                    { staticClass: "py-3" },
-                                    _vm._l(_vm.users, function (user) {
-                                      return _c("user-card", {
-                                        key: user.id,
-                                        attrs: { user: user },
-                                        nativeOn: {
-                                          click: function ($event) {
-                                            _vm.showDataPane = true
+                                    {
+                                      staticClass: "py-3 overflow-auto",
+                                      staticStyle: { height: "550px" },
+                                    },
+                                    _vm._l(
+                                      _vm.supervisorsData,
+                                      function (supervisor) {
+                                        return _c("user-card", {
+                                          key: supervisor.id,
+                                          attrs: { supervisor: supervisor },
+                                          nativeOn: {
+                                            click: function ($event) {
+                                              _vm.showDataPane = true
+                                            },
                                           },
-                                        },
-                                      })
-                                    }),
+                                        })
+                                      }
+                                    ),
                                     1
                                   ),
                                 ]
@@ -37626,35 +37594,38 @@ var render = function () {
         "px-3 py-2 flex justify-between items-center bg-white cursor-pointer border-b border-l border-gray",
     },
     [
-      _c(
-        "div",
-        { staticClass: "flex items-center" },
-        [
-          _c("avatar", {
-            attrs: {
-              name: _vm.user.name,
-              size: 8,
-              borderSize: 2,
-              borderColor: "gray",
-            },
-          }),
-          _vm._v(" "),
-          _c(
-            "div",
-            { staticClass: "ml-3 leading-4 text-gray-700 tracking-wide" },
-            [
-              _c("p", { staticClass: "font-semibold text-sm" }, [
-                _vm._v(_vm._s(_vm.user.name)),
-              ]),
-              _vm._v(" "),
-              _c("small", { staticClass: "text-gray-400 text-xs" }, [
-                _vm._v(_vm._s(_vm.user.email)),
-              ]),
-            ]
-          ),
-        ],
-        1
-      ),
+      _c("div", { staticClass: "flex items-center" }, [
+        _c(
+          "div",
+          { staticClass: "relative" },
+          [
+            _c("avatar", {
+              attrs: { name: _vm.supervisor.fullName, size: 8, borderSize: 1 },
+            }),
+            _vm._v(" "),
+            _c("div", {
+              staticClass:
+                "absolute bottom-4 left-5 h-4 w-4 my-1 border-2 border-white rounded-full z-2",
+              class: "bg-" + (_vm.isActive ? "green" : "red") + "-400",
+            }),
+          ],
+          1
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "ml-3 leading-4 text-gray-700 tracking-wide" },
+          [
+            _c("p", { staticClass: "font-semibold text-sm" }, [
+              _vm._v(_vm._s(_vm.supervisor.fullName)),
+            ]),
+            _vm._v(" "),
+            _c("small", { staticClass: "text-gray-400 text-xs" }, [
+              _vm._v(_vm._s(_vm.supervisor.email)),
+            ]),
+          ]
+        ),
+      ]),
       _vm._v(" "),
       _c("i", { staticClass: "fa fa-caret-right ml-2" }),
     ]
@@ -37696,7 +37667,7 @@ var render = function () {
         _vm.borderSize +
         " border-" +
         _vm.borderColor +
-        " " +
+        "-600 " +
         (_vm.borderSize === 0 ? "border" : ""),
       style: "background-color:#" + _vm.backgroundColor,
     },
@@ -67761,10 +67732,10 @@ var axiosCalls = {
         _this.loopAllErrorsAsTriggerErrorToast(error);
       });
     },
-    asyncGetDashboardData: function asyncGetDashboardData() {
+    asyncGetSupervisorsData: function asyncGetSupervisorsData() {
       var _this2 = this;
 
-      return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('get-dashboard-data')["catch"](function (error) {
+      return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('get-supervisors-data')["catch"](function (error) {
         _this2.loopAllErrorsAsTriggerErrorToast(error);
       });
     },

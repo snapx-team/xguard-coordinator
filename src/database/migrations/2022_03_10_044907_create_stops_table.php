@@ -12,8 +12,8 @@ class CreateStopsTable extends Migration
         Schema::create('sa_stops', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supervisor_shift_id')->constrained()->cascadeOnUpdate()->on('sa_supervisor_shifts');
-            $table->date('start_time');
-            $table->date('end_time');
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
             $table->point('location');
             $table->timestamps();
             $table->softDeletes();

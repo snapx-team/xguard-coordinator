@@ -12,8 +12,8 @@ export const axiosCalls = {
             });
         },
 
-        asyncGetDashboardData() {
-            return axios.get('get-dashboard-data').catch((error) => {
+        asyncGetSupervisorsData() {
+            return axios.get('get-supervisors-data').catch((error) => {
                 this.loopAllErrorsAsTriggerErrorToast(error);
             });
         },
