@@ -12,8 +12,8 @@ class CreateCoordinatorsTable extends Migration
         Schema::create('sa_coordinators', function (Blueprint $table) {
             $table->id();
             $table->string('role');
-            $table->timestamps();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate();
+            $table->timestamps();
             $table->softDeletes();
         });
     }

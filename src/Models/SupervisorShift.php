@@ -3,6 +3,7 @@
 namespace Xguard\Coordinator\Models;
 
 use App\Models\User;
+use Carbon;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,11 +23,11 @@ class SupervisorShift extends Model
     const DELETED = 'DELETED';
     const USER = 'USER';
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at', 'start_time', 'end_time'];
     protected $table = 'sa_supervisor_shifts';
+    protected $appends = ['is_active'];
     protected $guarded = [];
     protected $cascadeDeletes = ['odometer', 'odometerPhoto', 'stops', 'jobSiteVisits'];
-
     protected $fillable = [
         self::USER_ID,
         self::START_TIME,
@@ -54,5 +55,10 @@ class SupervisorShift extends Model
     public function jobSiteVisits(): HasMany
     {
         return $this->hasMany(JobSiteVisit::class);
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return (!$this->end_time && $this->start_time &&  $this->start_time >= Carbon::now()->subDay());
     }
 }

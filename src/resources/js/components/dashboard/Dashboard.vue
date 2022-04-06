@@ -1,5 +1,5 @@
 <template>
-    <div v-if="dashboardData !== null">
+    <div v-if="supervisorsData !== null">
         <div class="bg-gray-100 w-full h-64 absolute top-0 rounded-b-lg" style="z-index: -1"></div>
 
         <div class="flex flex-wrap p-4 pl-10">
@@ -48,11 +48,11 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="py-3">
+                                <div class="py-3 overflow-auto" style="height:550px;">
                                     <user-card
-                                        v-for="user in users"
-                                        :key="user.id"
-                                        :user="user"
+                                        v-for="supervisor in supervisorsData"
+                                        :key="supervisor.id"
+                                        :supervisor="supervisor"
                                         @click.native="showDataPane = true"
                                     ></user-card>
                                 </div>
@@ -140,12 +140,13 @@ export default {
     mixins: [axiosCalls],
 
     mounted() {
-        this.getDashboardData();
+        this.getSupervisorsData();
     },
 
     data() {
         return {
-            dashboardData: null,
+            supervisorsData: null,
+            jobSiteMarkers: [],
             selectedDate: new Date(),
             showSupervisorPane: true,
             showDataPane: false,
@@ -174,72 +175,38 @@ export default {
             },
             window_open: false,
             currentMidx: null,
-            users: [
-                {id: 1, name: 'siamak Samie', email: 'siamak.samie@gmail.com'},
-                {id: 2, name: 'siamak A', email: 'siamak.a@gmail.com'},
-                {id: 3, name: 'siamak B', email: 'siamak.b@gmail.com'},
-                {id: 4, name: 'siamak C', email: 'siamak.c@gmail.com'},
-            ],
-
-            jobSites: [
-                {
-                    "name": "Location 1",
-                    "address": "215 West Girard Avenue 19123",
-                    "location": {
-                        "lat": 39.9695601,
-                        "lon": -75.1395161
-                    },
-                    "label": "1",
-                },
-                {
-                    "name": "Location 2",
-                    "address": "5360 Old York Road 19141",
-                    "location": {
-                        "lat": 40.034038,
-                        "lon": -75.145223
-                    },
-                    "label": "2",
-                },
-                {
-                    "name": "Location 3",
-                    "address": "1350 W Girard Avenue 19123",
-                    "location": {
-                        "lat": 39.9713524,
-                        "lon": -75.159036
-                    },
-                    "label": "3",
-                }
-            ]
         };
     },
 
     computed: {
         google: gmapApi,
-        jobSiteMarkers() {
-            return this.jobSites.map(({label, location: {lat, lon}, name,  address}) => ({
-                label: {
-                    text: label,
-                    color: "#fff",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                },
-                position: {
-                    lat,
-                    lng: lon,
-                },
-                name,
-                address
-            }));
-        },
     },
 
     methods: {
-        getDashboardData() {
+        getSupervisorsData() {
             this.eventHub.$emit("set-loading-state", true);
-            this.asyncGetDashboardData().then((data) => {
-                this.dashboardData = data.data;
+            this.asyncGetSupervisorsData().then((data) => {
+                this.supervisorsData = data.data.supervisorsData;
                 this.eventHub.$emit("set-loading-state", false);
             });
+        },
+
+        setJobSiteMarkers() {
+                //TODO: format this with supervisorsData
+                // return this.supervisorsData.jobSites.map(({label, location: {lat, lon}, name, address}) => ({
+                //     label: {
+                //         text: label,
+                //         color: "#fff",
+                //         fontWeight: "bold",
+                //         fontSize: "16px",
+                //     },
+                //     position: {
+                //         lat,
+                //         lng: lon,
+                //     },
+                //     name,
+                //     address
+                // }));
         },
 
         getPosition: function (marker) {
@@ -272,10 +239,9 @@ export default {
 };
 </script>
 
-
 <style scoped>
 #map {
-    height: 500px;
+    height: 600px;
     width: 100%;
     margin: 0 auto;
 }
