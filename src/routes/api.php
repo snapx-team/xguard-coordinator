@@ -20,5 +20,8 @@ Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function (
 
         Route::post('/job-site-visit', 'JobSiteVisitController@store')->name('.create-job-site-visit');
         Route::patch('/job-site-visit', 'JobSiteVisitController@update')->name('.update-job-site-visit');
+
+        Route::get('/get-all-contracts', 'ErpController@getAllContracts');
+        Route::get('/get-some-contracts/{searchTerm}', 'ErpController@getSomeContracts');
     });
 });

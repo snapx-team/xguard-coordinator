@@ -10,7 +10,8 @@ class ContractResource extends JsonResource
     {
         return [
             'id'=> $this->id,
-            'name'=> $this->contract_identifier
+            'name'=> $this->contract_identifier,
+            'jobSite' => new JobSiteResource($this->whenLoaded('jobSite'))
         ];
     }
 }

@@ -8190,7 +8190,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n#map[data-v-0617fb13] {\n    height: 600px;\n    width: 100%;\n    margin: 0 auto;\n}\n.list-inline-item[data-v-0617fb13] {\n    cursor: pointer;\n}\n", ""]);
+exports.push([module.i, "\n#map[data-v-0617fb13] {\r\n    height: 600px;\r\n    width: 100%;\r\n    margin: 0 auto;\n}\n.list-inline-item[data-v-0617fb13] {\r\n    cursor: pointer;\n}\r\n", ""]);
 
 // exports
 
@@ -8209,7 +8209,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n.group:hover .group-hover\\:flex[data-v-bb806982] {\n    display: flex;\n}\n", ""]);
+exports.push([module.i, "\n.group:hover .group-hover\\:flex[data-v-bb806982] {\r\n    display: flex;\n}\r\n", ""]);
 
 // exports
 
