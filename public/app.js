@@ -7476,6 +7476,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 
@@ -7500,26 +7501,21 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      googleMapRefreshKey: 0,
+      allJobSiteVisits: null,
       supervisorsData: null,
       jobSiteMarkers: [],
       selectedDate: new Date(),
       showSupervisorPane: true,
       showDataPane: false,
       options: {
-        zoom: 12,
+        zoom: 11,
         center: {
-          lat: 39.9995601,
-          lng: -75.1395161
-        },
-        mapTypeId: "roadmap"
-      },
-      info_marker: null,
-      infowindow: {
-        lat: 39.9995601,
-        lng: -75.1395161
+          lat: 45.533550,
+          lng: -73.602119
+        }
       },
       infoPosition: null,
-      infoContent: null,
       infoOptions: {
         pixelOffset: {
           width: 0,
@@ -7529,7 +7525,7 @@ __webpack_require__.r(__webpack_exports__);
         content: null
       },
       window_open: false,
-      currentMidx: null
+      currentMarkerIndex: null
     };
   },
   computed: {
@@ -7546,38 +7542,48 @@ __webpack_require__.r(__webpack_exports__);
         _this.eventHub.$emit("set-loading-state", false);
       });
     },
-    setJobSiteMarkers: function setJobSiteMarkers() {//TODO: format this with supervisorsData
-      // return this.supervisorsData.jobSites.map(({label, location: {lat, lon}, name, address}) => ({
-      //     label: {
-      //         text: label,
-      //         color: "#fff",
-      //         fontWeight: "bold",
-      //         fontSize: "16px",
-      //     },
-      //     position: {
-      //         lat,
-      //         lng: lon,
-      //     },
-      //     name,
-      //     address
-      // }));
+    showDataPaneInfo: function showDataPaneInfo(supervisorShifts) {
+      this.showDataPane = true;
+      this.allJobSiteVisits = supervisorShifts.flatMap(function (e) {
+        return e.jobSiteVisits;
+      });
+      this.setJobSiteMarkers();
+      this.googleMapRefreshKey++;
+    },
+    setJobSiteMarkers: function setJobSiteMarkers() {
+      this.jobSiteMarkers = this.allJobSiteVisits.map(function (e) {
+        return {
+          label: {
+            text: e.jobSite.contracts[0].id.toString(),
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: "14px"
+          },
+          position: {
+            lat: parseFloat(e.jobSite.lat),
+            lng: parseFloat(e.jobSite.lng)
+          },
+          name: e.jobSite.contracts[0].name,
+          address: e.jobSite.address
+        };
+      });
     },
     getPosition: function getPosition(marker) {
       return {
-        lat: parseFloat(marker.position.lat),
-        lng: parseFloat(marker.position.lng)
+        lat: marker.position.lat,
+        lng: marker.position.lng
       };
     },
-    openWindow: function openWindow(marker, idx) {
+    openWindow: function openWindow(marker, index) {
       this.showDataPane = true;
       this.infoPosition = this.getPosition(marker);
       this.infoOptions.content = '<div class="">' + '<p class="font-semibold">' + marker.name + '</p>' + '<p class="">' + marker.address + '</p>' + '</div>';
 
-      if (this.currentMidx === idx) {
+      if (this.currentMarkerIndex === index) {
         this.window_open = !this.window_open;
       } else {
         this.window_open = true;
-        this.currentMidx = idx;
+        this.currentMarkerIndex = index;
       }
     }
   }
@@ -7606,13 +7612,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     Avatar: _global_Avatar__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   props: {
-    jobSite: {
+    jobSiteMarker: {
       type: Object,
       "default": function _default() {
         return {};
@@ -8209,7 +8219,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n.group:hover .group-hover\\:flex[data-v-bb806982] {\n    display: flex;\n}\n", ""]);
+exports.push([module.i, "\n.group:hover .group-hover\\:flex[data-v-bb806982] {\r\n    display: flex;\n}\r\n", ""]);
 
 // exports
 
@@ -37327,7 +37337,9 @@ var render = function () {
                                           attrs: { supervisor: supervisor },
                                           nativeOn: {
                                             click: function ($event) {
-                                              _vm.showDataPane = true
+                                              return _vm.showDataPaneInfo(
+                                                supervisor.supervisorShifts
+                                              )
                                             },
                                           },
                                         })
@@ -37351,7 +37363,10 @@ var render = function () {
                               _c(
                                 "gmap-map",
                                 _vm._b(
-                                  { attrs: { id: "map" } },
+                                  {
+                                    key: _vm.googleMapRefreshKey,
+                                    attrs: { id: "map" },
+                                  },
                                   "gmap-map",
                                   _vm.options,
                                   false
@@ -37463,12 +37478,18 @@ var render = function () {
                                     { staticClass: "py-3" },
                                     _vm._l(
                                       _vm.jobSiteMarkers,
-                                      function (m, index) {
+                                      function (jobSiteMarker, index) {
                                         return _c("job-site-card", {
                                           key: index,
+                                          attrs: {
+                                            jobSiteMarker: jobSiteMarker,
+                                          },
                                           nativeOn: {
                                             click: function ($event) {
-                                              return _vm.openWindow(m, index)
+                                              return _vm.openWindow(
+                                                jobSiteMarker,
+                                                index
+                                              )
                                             },
                                           },
                                         })
@@ -37533,35 +37554,31 @@ var render = function () {
         "px-3 py-2 flex justify-between items-center bg-white cursor-pointer border-b border-l border-gray",
     },
     [
-      _c(
-        "div",
-        { staticClass: "flex items-center" },
-        [
-          _c("avatar", {
-            attrs: {
-              name: _vm.jobSite.name,
-              size: 8,
-              borderSize: 2,
-              borderColor: "gray",
-            },
-          }),
-          _vm._v(" "),
-          _c(
-            "div",
-            { staticClass: "ml-3 leading-4 text-gray-700 tracking-wide" },
-            [
-              _c("p", { staticClass: "font-semibold text-sm" }, [
-                _vm._v(_vm._s(_vm.jobSite.name)),
-              ]),
-              _vm._v(" "),
-              _c("small", { staticClass: "text-gray-400 text-xs" }, [
-                _vm._v(_vm._s(_vm.jobSite.address)),
-              ]),
-            ]
-          ),
-        ],
-        1
-      ),
+      _c("div", { staticClass: "flex items-center" }, [
+        _c(
+          "div",
+          { staticClass: "w-8 h-8 rounded-full flex flex-none bg-red-500" },
+          [
+            _c("p", { staticClass: "text-white m-auto font-semibold" }, [
+              _vm._v(_vm._s(_vm.jobSiteMarker.label.text)),
+            ]),
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "ml-3 leading-4 text-gray-700 tracking-wide" },
+          [
+            _c("p", { staticClass: "font-semibold text-sm" }, [
+              _vm._v(_vm._s(_vm.jobSiteMarker.name)),
+            ]),
+            _vm._v(" "),
+            _c("small", { staticClass: "text-gray-400 text-xs" }, [
+              _vm._v(_vm._s(_vm.jobSiteMarker.address)),
+            ]),
+          ]
+        ),
+      ]),
     ]
   )
 }

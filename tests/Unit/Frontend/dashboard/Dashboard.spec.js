@@ -3,10 +3,11 @@
 import {createLocalVue, shallowMount} from '@vue/test-utils';
 import Dashboard from '../../../../src/resources/js/components/dashboard/Dashboard';
 import Vue from 'vue';
+import {supervisorMockData} from '../../../JsonMockData/supervisorMockData';
 
 const localVue = createLocalVue();
 
-describe('UserCard.vue', () => {
+describe('Dashboard.vue', () => {
 
     let wrapper;
 
@@ -25,7 +26,7 @@ describe('UserCard.vue', () => {
         });
     });
 
-    it('Checks that fires createCoordinators event', () => {
+    it('openWindow google map function sets correct data', () => {
 
         let marker = {
             'label': {
@@ -48,11 +49,34 @@ describe('UserCard.vue', () => {
         };
 
         expect(wrapper.vm.showDataPane).toBe(false);
-        expect(wrapper.vm.currentMidx).toBe(null);
+        expect(wrapper.vm.currentMarkerIndex).toBe(null);
         expect(wrapper.vm.infoPosition).toBe(null);
         wrapper.vm.openWindow(marker, 1);
         expect(wrapper.vm.showDataPane).toBe(true);
-        expect(wrapper.vm.currentMidx).toBe(1);
+        expect(wrapper.vm.currentMarkerIndex).toBe(1);
         expect(wrapper.vm.infoPosition).toMatchObject(infoPosition);
+    });
+
+    it('setJobSiteMarkers formats data properly for google maps', () => {
+
+        expect(wrapper.vm.googleMapRefreshKey).toBe(0);
+        expect(wrapper.vm.showDataPane).toBe(false);
+        wrapper.vm.showDataPaneInfo(supervisorMockData().supervisorShifts);
+        expect(wrapper.vm.showDataPane).toBe(true); // data pane must open
+        expect(wrapper.vm.googleMapRefreshKey).toBe(1); // refresh key must increment by 1
+        expect(wrapper.vm.allJobSiteVisits.length).toBe(3); // an array of all job site visits must be created
+        expect(wrapper.vm.allJobSiteVisits.length).toBe(3); // an array of all job site visits must be created
+
+        // testing that job site markers are formatted correctly
+        expect(wrapper.vm.jobSiteMarkers).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    'address': '9494 boulevard st-laurent',
+                    'label': {'color': '#fff', 'fontSize': '14px', 'fontWeight': 'bold', 'text': '3'},
+                    'name': '3 - Test',
+                    'position': {'lat': 45.5451245, 'lng': -73.6542803}
+                }),
+            ])
+        );
     });
 });

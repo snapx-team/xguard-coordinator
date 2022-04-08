@@ -53,7 +53,7 @@
                                         v-for="supervisor in supervisorsData"
                                         :key="supervisor.id"
                                         :supervisor="supervisor"
-                                        @click.native="showDataPane = true"
+                                        @click.native="showDataPaneInfo(supervisor.supervisorShifts)"
                                     ></user-card>
                                 </div>
                             </div>
@@ -61,7 +61,7 @@
                         <pane :size="50" class="flex-grow">
                             <div>
 
-                                <gmap-map id="map" v-bind="options">
+                                <gmap-map id="map" v-bind="options" :key="googleMapRefreshKey">
 
                                     <gmap-marker
                                         :key="index"
@@ -100,9 +100,10 @@
                                 </div>
                                 <div class="py-3">
                                     <job-site-card
-                                        v-for="(m, index) in jobSiteMarkers"
+                                        v-for="(jobSiteMarker, index) in jobSiteMarkers"
                                         :key="index"
-                                        @click.native="openWindow(m, index)"
+                                        :jobSiteMarker="jobSiteMarker"
+                                        @click.native="openWindow(jobSiteMarker, index)"
                                     ></job-site-card>
                                 </div>
                             </div>
@@ -145,26 +146,21 @@ export default {
 
     data() {
         return {
+            googleMapRefreshKey: 0,
+            allJobSiteVisits: null,
             supervisorsData: null,
             jobSiteMarkers: [],
             selectedDate: new Date(),
             showSupervisorPane: true,
             showDataPane: false,
             options: {
-                zoom: 12,
+                zoom: 11,
                 center: {
-                    lat: 39.9995601,
-                    lng: -75.1395161,
+                    lat: 45.533550,
+                    lng: -73.602119,
                 },
-                mapTypeId: "roadmap",
-            },
-            info_marker: null,
-            infowindow: {
-                lat: 39.9995601,
-                lng: -75.1395161,
             },
             infoPosition: null,
-            infoContent: null,
             infoOptions: {
                 pixelOffset: {
                     width: 0,
@@ -174,7 +170,7 @@ export default {
                 content: null,
             },
             window_open: false,
-            currentMidx: null,
+            currentMarkerIndex: null,
         };
     },
 
@@ -191,31 +187,35 @@ export default {
             });
         },
 
+        showDataPaneInfo(supervisorShifts) {
+            this.showDataPane = true;
+            this.allJobSiteVisits = supervisorShifts.flatMap((e) => e.jobSiteVisits);
+            this.setJobSiteMarkers();
+            this.googleMapRefreshKey++;
+        },
+
         setJobSiteMarkers() {
-                //TODO: format this with supervisorsData
-                // return this.supervisorsData.jobSites.map(({label, location: {lat, lon}, name, address}) => ({
-                //     label: {
-                //         text: label,
-                //         color: "#fff",
-                //         fontWeight: "bold",
-                //         fontSize: "16px",
-                //     },
-                //     position: {
-                //         lat,
-                //         lng: lon,
-                //     },
-                //     name,
-                //     address
-                // }));
+            this.jobSiteMarkers =  this.allJobSiteVisits.map( e => ({
+                label: {
+                    text: (e.jobSite.contracts[0].id).toString(),
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                },
+                position: { lat: parseFloat(e.jobSite.lat), lng: parseFloat(e.jobSite.lng) },
+                name: e.jobSite.contracts[0].name,
+                address: e.jobSite.address
+            }));
         },
 
         getPosition: function (marker) {
             return {
-                lat: parseFloat(marker.position.lat),
-                lng: parseFloat(marker.position.lng),
+                lat: marker.position.lat,
+                lng: marker.position.lng
             };
         },
-        openWindow(marker, idx) {
+        openWindow(marker, index) {
+
             this.showDataPane = true;
             this.infoPosition = this.getPosition(marker);
             this.infoOptions.content =
@@ -228,11 +228,11 @@ export default {
                 '</p>' +
                 '</div>';
 
-            if (this.currentMidx === idx) {
+            if (this.currentMarkerIndex === index) {
                 this.window_open = !this.window_open;
             } else {
                 this.window_open = true;
-                this.currentMidx = idx;
+                this.currentMarkerIndex = index;
             }
         },
     },
