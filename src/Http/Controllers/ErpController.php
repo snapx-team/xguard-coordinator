@@ -3,6 +3,7 @@
 namespace Xguard\Coordinator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Collection;
 use Xguard\Coordinator\Repositories\ErpContractsRepository;
 use Xguard\Coordinator\Repositories\ErpUsersRepository;
@@ -20,12 +21,12 @@ class ErpController extends Controller
         return ErpUsersRepository::getSomeUsers($search);
     }
 
-    public function getAllContracts(): Collection
+    public function getAllContracts(): AnonymousResourceCollection
     {
         return ErpContractsRepository::getAllContracts();
     }
 
-    public function getSomeContracts($search): Collection
+    public function getSomeContracts($search): AnonymousResourceCollection
     {
         return ErpContractsRepository::getSomeContracts($search);
     }
