@@ -21,12 +21,12 @@ class ErpController extends Controller
         return ErpUsersRepository::getSomeUsers($search);
     }
 
-    public function getAllContracts(): AnonymousResourceCollection
+    public function getAllContracts(): array
     {
         return ErpContractsRepository::getAllContracts();
     }
 
-    public function getSomeContracts($search): AnonymousResourceCollection
+    public function getSomeContracts($search): array
     {
         return ErpContractsRepository::getSomeContracts($search);
     }

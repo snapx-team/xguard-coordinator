@@ -20,13 +20,13 @@ class JobSiteResource extends JsonResource
             'onSiteClientPosition' => $this->on_site_client_info_position,
             'onSiteClientEmail' => $this->on_site_client_info_email,
             'clientNeeds' => $this->client_info_needs,
-            'clientType' => $this->client_info_needs,
-            'jobSiteType' => $this->client_info_needs,
+            'clientType' => $this->client_type,
+            'jobSiteType' => $this->job_site_type,
             'workEnvironment' => $this->work_environment,
             'addedXguardServices' => $this->added_xguard_services,
             'accessToEstablishment' => $this->access_to_establishment,
             'typeOfClothing' => $this->type_of_clothing,
-            'contracts' => ContractResource::collection($this->whenLoaded('contracts'))
+            'contracts' => ContractResource::collection($this->whenLoaded('contracts')),
         ];
     }
 }
