@@ -15,7 +15,7 @@ class SupervisorShiftController extends Controller
     {
         try {
             $shift = SupervisorShift::create([
-                SupervisorShift::USER_ID => $request->user()->id,
+                SupervisorShift::USER_ID => $request->user_id,
                 SupervisorShift::START_TIME => $request->start_time
             ]);
             return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
