@@ -12,7 +12,7 @@ class JobSiteVisitResource extends JsonResource
             'id'=> $this->id,
             'startTime'=> $this->startTime,
             'endTime'=> $this->endTime,
-            'JobSite' => new JobSiteResource($this->whenLoaded('jobSite'))
+            'jobSite' => new JobSiteResource($this->whenLoaded('jobSite'))
         ];
     }
 }

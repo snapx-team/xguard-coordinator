@@ -1,8 +1,8 @@
 /* eslint-disable no-undef*/
 
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import {createLocalVue, shallowMount} from '@vue/test-utils';
 import UserCard from '../../../../src/resources/js/components/dashboard/dashboardComponents/UserCard';
-import Vue from 'vue';
+import {supervisorMockData} from '../../../JsonMockData/supervisorMockData';
 
 const localVue = createLocalVue();
 
@@ -10,23 +10,23 @@ describe('UserCard.vue', () => {
 
     let wrapper;
 
-    beforeEach(() => {
-        // eslint-disable-next-line no-unused-vars
+    it('retrieve isActive if any supervisor shift has active shift', () => {
+        let props = {supervisor: supervisorMockData()};
+
         wrapper = shallowMount(UserCard, {
             localVue,
-            mocks: {
-                $role: 'admin',
-            },
-
-            provide() {
-                return {
-                    eventHub: new Vue()
-                };
-            },
+            propsData: props,
         });
+        expect(wrapper.vm.isActive).toBe(true);
     });
 
-    it('Todo', () => {
-        expect(true).toBe(true);
+    it('assert isActive false if supervisor shift does not have active shift', () => {
+        let props = {supervisor: supervisorMockData(false)};
+
+        wrapper = shallowMount(UserCard, {
+            localVue,
+            propsData: props,
+        });
+        expect(wrapper.vm.isActive).toBe(false);
     });
 });
