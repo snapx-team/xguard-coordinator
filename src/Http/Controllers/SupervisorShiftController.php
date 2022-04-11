@@ -13,12 +13,18 @@ class SupervisorShiftController extends Controller
 {
     public function store(SupervisorShiftRequest $request): \Illuminate\Http\Response
     {
-        $shift = SupervisorShift::create([
-            SupervisorShift::USER_ID => $request->user()->id,
-            SupervisorShift::START_TIME => $request->start_time
-        ]);
-
-        return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
+        try {
+            $shift = SupervisorShift::create([
+                SupervisorShift::USER_ID => $request->user()->id,
+                SupervisorShift::START_TIME => $request->start_time
+            ]);
+            return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return response([
+                'success' => 'false',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
 
     public function update(SupervisorShiftRequest $request): \Illuminate\Http\Response
