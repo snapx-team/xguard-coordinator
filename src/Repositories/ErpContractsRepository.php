@@ -3,7 +3,8 @@
 namespace Xguard\Coordinator\Repositories;
 
 use App\Models\Contract;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Xguard\Coordinator\Http\Resources\ContractResource;
 use Xguard\LaravelKanban\Entities\ErpContract;
 
 class ErpContractsRepository
@@ -14,23 +15,19 @@ class ErpContractsRepository
         return $erpContract ? new ErpContract($erpContract->id, $erpContract->contract_identifier) : null;
     }
 
-    public static function getAllContracts(): Collection
+    public static function getAllContracts(): AnonymousResourceCollection
     {
-        $erpContracts = Contract::orderBy('contract_identifier')->take(10)->get();
+        $erpContracts = Contract::with('jobSite')->orderBy('contract_identifier')->get();
 
-        return $erpContracts->map(function ($erpContract) {
-            return new ErpContract($erpContract->id, $erpContract->contract_identifier);
-        });
+        return ContractResource::collection($erpContracts);
     }
 
-    public static function getSomeContracts($search): Collection
+    public static function getSomeContracts($search): AnonymousResourceCollection
     {
-        $erpContracts = Contract::where(function ($q) use ($search) {
+        $erpContracts = Contract::with('jobSite')->where(function ($q) use ($search) {
             $q->where('contract_identifier', 'like', "%{$search}%");
         })->orderBy('contract_identifier')->take(10)->get();
 
-        return $erpContracts->map(function ($erpContract) {
-            return new ErpContract($erpContract->id, $erpContract->contract_identifier);
-        });
+        return ContractResource::collection($erpContracts);
     }
 }
