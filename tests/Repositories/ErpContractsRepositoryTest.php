@@ -36,7 +36,7 @@ class ErpContractsRepositoryTest extends TestCase
     public function testGetSomeContractsReturnsCollectionOfMatchingEntries()
     {
         $searchTerm = Str::random(rand(self::SEARCH_TERM_MIN, self::SEARCH_TERM_MAX));
-        $matchCount = 0;
+        $matchCount = self::ZERO;
 
         for ($i = self::ZERO; $i < self::LOOP_MAX; $i++) {
             $identifier = Str::random(rand(self::IDENTIFIER_MIN, self::IDENTIFIER_MAX));
@@ -47,7 +47,7 @@ class ErpContractsRepositoryTest extends TestCase
         }
 
         $result = $this->contractsRepository::getSomeContracts($searchTerm);
-        $this->assertEquals($matchCount, $result->count());
+        $this->assertEquals($matchCount, count($result));
     }
 
     public function testGetSomeContractsReturnsCollectionOfMax10Contracts()
@@ -58,7 +58,7 @@ class ErpContractsRepositoryTest extends TestCase
 
         $result = $this->contractsRepository::getSomeContracts($searchTerm);
 
-        $this->assertEquals(self::CONTRACT_COUNT_MAX, $result->count());
+        $this->assertEquals(self::CONTRACT_COUNT_MAX, count($result));
     }
 
     public function testGetAllContractsReturnsCollectionOfAllContracts()
@@ -66,6 +66,6 @@ class ErpContractsRepositoryTest extends TestCase
         $contractCount = rand(self::ZERO, self::CONTRACT_COUNT_MAX);
         factory(Contract::class, $contractCount)->create();
         $result = $this->contractsRepository::getAllContracts();
-        $this->assertEquals($contractCount, $result->count());
+        $this->assertEquals($contractCount, count($result));
     }
 }

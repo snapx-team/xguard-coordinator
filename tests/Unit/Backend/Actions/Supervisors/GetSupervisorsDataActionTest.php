@@ -8,7 +8,6 @@ use App\Models\JobSite;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 use Xguard\Coordinator\Actions\Supervisors\GetSupervisorsDataAction;
 use Xguard\Coordinator\Models\Coordinator;
@@ -86,7 +85,6 @@ class GetSupervisorsDataActionTest extends TestCase
                                                     'name'
                                                 ]
                                             ]
-
                                         ]
                                     ]
                                 ]
