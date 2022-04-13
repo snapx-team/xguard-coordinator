@@ -7560,11 +7560,11 @@ __webpack_require__.r(__webpack_exports__);
             fontSize: "14px"
           },
           position: {
-            lat: parseFloat(e.jobSite.lat),
-            lng: parseFloat(e.jobSite.lng)
+            lat: parseFloat(e.address.lat),
+            lng: parseFloat(e.address.lng)
           },
           name: e.jobSite.contracts[0].name,
-          address: e.jobSite.address
+          address: e.address.name
         };
       });
     },
@@ -8200,7 +8200,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n#map[data-v-0617fb13] {\r\n    height: 600px;\r\n    width: 100%;\r\n    margin: 0 auto;\n}\n.list-inline-item[data-v-0617fb13] {\r\n    cursor: pointer;\n}\r\n", ""]);
+exports.push([module.i, "\n#map[data-v-0617fb13] {\n    height: 600px;\n    width: 100%;\n    margin: 0 auto;\n}\n.list-inline-item[data-v-0617fb13] {\n    cursor: pointer;\n}\n", ""]);
 
 // exports
 

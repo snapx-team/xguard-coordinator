@@ -202,9 +202,9 @@ export default {
                     fontWeight: "bold",
                     fontSize: "14px",
                 },
-                position: { lat: parseFloat(e.jobSite.lat), lng: parseFloat(e.jobSite.lng) },
+                position: { lat: parseFloat(e.address.lat), lng: parseFloat(e.address.lng) },
                 name: e.jobSite.contracts[0].name,
-                address: e.jobSite.address
+                address: e.address.name
             }));
         },
 

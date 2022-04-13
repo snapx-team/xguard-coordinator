@@ -3,6 +3,7 @@
 namespace Xguard\Coordinator\Models;
 
 use App\Models\JobSite;
+use App\Models\JobSiteSubaddress;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,10 @@ class JobSiteVisit extends Model
         self::START_TIME,
         self::END_TIME
     ];
+    protected $appends = [
+        'address',
+    ];
+
     public function jobSite(): BelongsTo
     {
         return $this->belongsTo(JobSite::class);
@@ -35,5 +40,27 @@ class JobSiteVisit extends Model
     public function supervisorShift(): BelongsTo
     {
         return $this->belongsTo(SupervisorShift::class);
+    }
+
+    public function getAddressAttribute(): array
+    {
+        if (!$this->job_site_subaddress_id) {
+            $jobSite = JobSite::where('id', $this->job_site_id)->first();
+            $address = [
+                'id' => $jobSite->id,
+                'name' => $jobSite->google_formatted_address,
+                'lat' => $jobSite->google_coordinates_lat,
+                'lng' => $jobSite->google_coordinates_lng,
+            ];
+        } else {
+            $jobSiteSubAddress = JobSiteSubaddress::where('id', $this->job_site_subaddress_id)->first();
+            $address = [
+                'id' => $jobSiteSubAddress->id,
+                'name' => $jobSiteSubAddress->formatted_address,
+                'lat' => $jobSiteSubAddress->latitude,
+                'lng' => $jobSiteSubAddress->longitude,
+            ];
+        }
+        return $address;
     }
 }

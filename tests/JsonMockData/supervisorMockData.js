@@ -25,7 +25,13 @@ export function supervisorMockData(isActive = true) {
                                     'name': '3 - Test'
                                 }
                             ]
-                        }
+                        },
+                        'address': {
+                            'id': 2,
+                            'name': '9494 boulevard st-laurent',
+                            'lat': 45.5451245,
+                            'lng': -73.6542803,
+                        },
                     },
                     {
                         'id': 4,
@@ -43,7 +49,13 @@ export function supervisorMockData(isActive = true) {
                                     'name': '16 - ZZZ-Residence Longpré-ZZZ'
                                 }
                             ]
-                        }
+                        },
+                        'address': {
+                            'id': 2,
+                            'name': '13952 de montigny, pointes aux trembles',
+                            'lat': 45.6678806,
+                            'lng': -73.4996059,
+                        },
                     }
                 ]
             },
@@ -68,7 +80,13 @@ export function supervisorMockData(isActive = true) {
                                     'name': '2 - RÉSIDENCE IVVI-Groupe Maurice'
                                 }
                             ]
-                        }
+                        },
+                        'address': {
+                            'id': 2,
+                            'name': '3100 Promenade Quartier St-Martin',
+                            'lat': 45.5600381,
+                            'lng': -73.7486888,
+                        },
                     }
                 ]
             }
