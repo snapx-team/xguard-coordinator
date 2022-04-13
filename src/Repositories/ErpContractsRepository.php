@@ -35,15 +35,19 @@ class ErpContractsRepository
 
             $erpContract->addresses = collect([]);
             $erpContract->addresses->push([
+                'id' =>$erpContract->jobSite->id,
                 'address' => $erpContract->jobSite->google_formatted_address,
                 'lat' => $erpContract->jobSite->google_coordinates_lat,
-                'lng' => $erpContract->jobSite->google_coordinates_lng
+                'lng' => $erpContract->jobSite->google_coordinates_lng,
+                'isPrimaryAddress' => true
             ]);
             foreach ($erpContract['jobSite']['subaddresses'] as $subaddress) {
                 $erpContract->addresses->push([
+                    'id' =>$subaddress->id,
                     'address' => $subaddress->formatted_address,
                     'lat' => $subaddress->latitude,
                     'lng' => $subaddress->longitude,
+                    'isPrimaryAddress' => false
                 ]);
             }
 
