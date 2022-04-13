@@ -46,7 +46,7 @@ class ErpContractsRepositoryTest extends TestCase
             }
         }
 
-        $result = $this->contractsRepository::getSomeContracts($searchTerm);
+        $result = $this->contractsRepository::getSomeActiveContracts($searchTerm);
         $this->assertEquals($matchCount, count($result));
     }
 
@@ -56,7 +56,7 @@ class ErpContractsRepositoryTest extends TestCase
 
         factory(Contract::class, self::CONTRACT_COUNT_MAX + self::ONE)->create(['contract_identifier' => $searchTerm]);
 
-        $result = $this->contractsRepository::getSomeContracts($searchTerm);
+        $result = $this->contractsRepository::getSomeActiveContracts($searchTerm);
 
         $this->assertEquals(self::CONTRACT_COUNT_MAX, count($result));
     }
@@ -65,7 +65,7 @@ class ErpContractsRepositoryTest extends TestCase
     {
         $contractCount = rand(self::ZERO, self::CONTRACT_COUNT_MAX);
         factory(Contract::class, $contractCount)->create();
-        $result = $this->contractsRepository::getAllContracts();
+        $result = $this->contractsRepository::getAllActiveContracts();
         $this->assertEquals($contractCount, count($result));
     }
 }
