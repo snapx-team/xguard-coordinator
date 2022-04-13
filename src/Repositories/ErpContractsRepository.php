@@ -3,7 +3,6 @@
 namespace Xguard\Coordinator\Repositories;
 
 use App\Models\Contract;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Xguard\LaravelKanban\Entities\ErpContract;
 
 class ErpContractsRepository
@@ -14,17 +13,21 @@ class ErpContractsRepository
         return $erpContract ? new ErpContract($erpContract->id, $erpContract->contract_identifier) : null;
     }
 
-    public static function getAllContracts(): array
+    public static function getAllActiveContracts(): array
     {
-        $erpContracts = Contract::with('jobSite.subaddresses')->orderBy('contract_identifier')->get();
+        $erpContracts = Contract::with('jobSite.subaddresses')
+            ->where('status', '=', 'active')
+            ->orderBy('contract_identifier')->get();
         return self::formatContracts($erpContracts);
     }
 
-    public static function getSomeContracts($search): array
+    public static function getSomeActiveContracts($search): array
     {
-        $erpContracts = Contract::with('jobSite')->where(function ($q) use ($search) {
-            $q->where('contract_identifier', 'like', "%{$search}%");
-        })->orderBy('contract_identifier')->take(10)->get();
+        $erpContracts = Contract::with('jobSite')
+            ->where('status', '=', 'active')
+            ->where(function ($q) use ($search) {
+                $q->where('contract_identifier', 'like', "%{$search}%");
+            })->orderBy('contract_identifier')->take(10)->get();
 
         return self::formatContracts($erpContracts);
     }
@@ -35,7 +38,7 @@ class ErpContractsRepository
 
             $erpContract->addresses = collect([]);
             $erpContract->addresses->push([
-                'id' =>$erpContract->jobSite->id,
+                'id' => $erpContract->jobSite->id,
                 'address' => $erpContract->jobSite->google_formatted_address,
                 'lat' => $erpContract->jobSite->google_coordinates_lat,
                 'lng' => $erpContract->jobSite->google_coordinates_lng,
@@ -43,7 +46,7 @@ class ErpContractsRepository
             ]);
             foreach ($erpContract['jobSite']['subaddresses'] as $subaddress) {
                 $erpContract->addresses->push([
-                    'id' =>$subaddress->id,
+                    'id' => $subaddress->id,
                     'address' => $subaddress->formatted_address,
                     'lat' => $subaddress->latitude,
                     'lng' => $subaddress->longitude,
