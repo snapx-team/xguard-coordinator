@@ -14,6 +14,7 @@ class Supervisor extends User
     protected $appends = [
         self::FULL_NAME,
     ];
+    protected $with = [];
 
     public static function boot()
     {
