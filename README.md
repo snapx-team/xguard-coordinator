@@ -9,7 +9,7 @@ Plugin to manage supervisors on XGuard ERP
 Use the following commands to install
 
 ```bash
-composer require xguard/coordinator
+composer require xguard/xguard-coordinator
 php artisan migrate
 php artisan vendor:publish --provider="Xguard\Coordinator\CoordinatorServiceProvider" --force
 ```
