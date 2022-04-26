@@ -23,5 +23,6 @@ Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function (
 
         Route::get('/get-all-active-contracts', 'ErpController@getAllActiveContracts');
         Route::get('/get-some-active-contracts/{searchTerm}', 'ErpController@getSomeActiveContracts');
+        Route::get('/get-on-site-employees', 'ErpController@getOnSiteEmployees')->name('.get-on-site-employees');
     });
 });
