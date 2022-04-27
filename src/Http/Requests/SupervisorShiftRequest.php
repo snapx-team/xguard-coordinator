@@ -16,7 +16,11 @@ class SupervisorShiftRequest extends BaseFormRequest
             SupervisorShift::ID => 'required_without:'.SupervisorShift::USER_ID. '|exists:Xguard\Coordinator\Models\SupervisorShift,id',
             SupervisorShift::USER_ID => 'required_without:'.SupervisorShift::ID.'|exists:App\Models\User,id',
             SupervisorShift::START_TIME => 'required_without:'.SupervisorShift::END_TIME.'|date',
+            SupervisorShift::START_LAT => 'required_with:'.SupervisorShift::START_TIME.'|numeric',
+            SupervisorShift::START_LNG => 'required_with:'.SupervisorShift::START_TIME.'|numeric',
             SupervisorShift::END_TIME => 'required_without:'.SupervisorShift::START_TIME.'|date',
+            SupervisorShift::END_LAT => 'required_with:'.SupervisorShift::END_TIME.'|numeric',
+            SupervisorShift::END_LNG => 'required_with:'.SupervisorShift::END_TIME.'|numeric',
         ];
     }
 
