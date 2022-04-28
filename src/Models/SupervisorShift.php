@@ -20,6 +20,10 @@ class SupervisorShift extends Model
     const USER_ID = 'user_id';
     const START_TIME = 'start_time';
     const END_TIME = 'end_time';
+    const START_LAT = 'start_lat';
+    const START_LNG = 'start_lng';
+    const END_LAT = 'end_lat';
+    const END_LNG = 'end_lng';
     const DELETED = 'DELETED';
     const USER = 'USER';
 

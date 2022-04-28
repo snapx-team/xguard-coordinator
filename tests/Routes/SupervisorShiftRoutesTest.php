@@ -33,6 +33,8 @@ class SupervisorShiftRoutesTest extends TestCase
         $data = [
             SupervisorShift::USER_ID => $user->id,
             SupervisorShift::START_TIME => $this->faker->date(),
+            SupervisorShift::START_LAT => $this->faker->latitude,
+            SupervisorShift::START_LNG => $this->faker->longitude,
         ];
         $response = $this->post($apiCall, $data);
         $count = count(SupervisorShift::all());
@@ -46,7 +48,9 @@ class SupervisorShiftRoutesTest extends TestCase
         $apiCall = route(self::COORDINATOR_UPDATE_SHIFT);
         $data = [
             SupervisorShift::ID => $supervisorShift->id,
-            SupervisorShift::END_TIME => $this->faker->date()
+            SupervisorShift::END_TIME => $this->faker->date(),
+            SupervisorShift::END_LAT => $this->faker->latitude,
+            SupervisorShift::END_LNG => $this->faker->longitude,
         ];
         $response = $this->patch($apiCall, $data);
         $response->assertOk();

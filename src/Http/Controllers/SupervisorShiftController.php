@@ -16,7 +16,9 @@ class SupervisorShiftController extends Controller
         try {
             $shift = SupervisorShift::create([
                 SupervisorShift::USER_ID => $request->user_id,
-                SupervisorShift::START_TIME => $request->start_time
+                SupervisorShift::START_TIME => $request->start_time,
+                SupervisorShift::START_LAT => $request->start_lat,
+                SupervisorShift::START_LNG => $request->start_lng
             ]);
             return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
         } catch (\Exception $e) {
@@ -30,7 +32,11 @@ class SupervisorShiftController extends Controller
     public function update(SupervisorShiftRequest $request): \Illuminate\Http\Response
     {
         $shift = SupervisorShift::find($request->id);
-        $shift->fill([SupervisorShift::END_TIME => $request->end_time,])->save();
+        $shift->fill([
+            SupervisorShift::END_TIME => $request->end_time,
+            SupervisorShift::END_LAT => $request->start_lat,
+            SupervisorShift::END_LNG => $request->start_lng
+        ])->save();
         $shift->refresh();
         return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_OK);
     }
