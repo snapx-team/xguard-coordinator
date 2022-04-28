@@ -32,7 +32,7 @@ class ErpContractsRepository
         return self::formatContracts($erpContracts);
     }
 
-    public static function formatContracts($erpContracts)
+    private static function formatContracts($erpContracts)
     {
         return $erpContracts->map(function ($erpContract) {
 
