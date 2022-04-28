@@ -34,8 +34,8 @@ class SupervisorShiftController extends Controller
         $shift = SupervisorShift::find($request->id);
         $shift->fill([
             SupervisorShift::END_TIME => $request->end_time,
-            SupervisorShift::END_LAT => $request->start_lat,
-            SupervisorShift::END_LNG => $request->start_lng
+            SupervisorShift::END_LAT => $request->end_lat,
+            SupervisorShift::END_LNG => $request->end_lng
         ])->save();
         $shift->refresh();
         return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_OK);
