@@ -53,6 +53,23 @@ class ErpContractsRepository
                     'isPrimaryAddress' => false
                 ]);
             }
+            $requiredPermits = [];
+
+            if ($erpContract->jobSite->bsp_required) {
+                array_push($requiredPermits, 'bsp');
+            }
+            if ($erpContract->jobSite->asp_required) {
+                array_push($requiredPermits, 'asp');
+            }
+            if ($erpContract->jobSite->aqtr_required) {
+                array_push($requiredPermits, 'aqtr');
+            }
+            if ($erpContract->jobSite->rcr_required) {
+                array_push($requiredPermits, 'rcr');
+            }
+            if ($erpContract->jobSite->erailsafe_required) {
+                array_push($requiredPermits, 'erailsafe');
+            }
 
             return [
                 'id' => $erpContract->id,
@@ -69,6 +86,8 @@ class ErpContractsRepository
                 'addedXguardServices' => $erpContract->added_xguard_services,
                 'accessToEstablishment' => $erpContract->access_to_establishment,
                 'typeOfClothing' => $erpContract->type_of_clothing,
+                'requiredPermits' => $requiredPermits,
+                'protocols' => $erpContract->jobSite->protocols,
                 'addresses' => $erpContract->addresses->toArray()
             ];
         })->all();
