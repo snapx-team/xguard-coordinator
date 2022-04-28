@@ -3,6 +3,7 @@
 namespace Tests\Unit\Repositories;
 
 use App\Models\Contract;
+use App\Models\JobSite;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -67,5 +68,21 @@ class ErpContractsRepositoryTest extends TestCase
         factory(Contract::class, $contractCount)->create();
         $result = $this->contractsRepository::getAllActiveContracts();
         $this->assertEquals($contractCount, count($result));
+    }
+
+    public function testArrayOfRequiredPermits()
+    {
+        $requiredPermits = [
+            'bsp_required' => true,
+            'asp_required' => true,
+            'aqtr_required' => true,
+            'rcr_required' => true,
+            'erailsafe_required' => true,
+        ];
+        $jobSite = factory(JobSite::class)->create($requiredPermits);
+        factory(Contract::class)->create(['job_site_id' => $jobSite->id]);
+        $result = $this->contractsRepository::getAllActiveContracts();
+        $contract = $result[0];
+        $this->assertEquals(count($requiredPermits), count($contract['requiredPermits']));
     }
 }

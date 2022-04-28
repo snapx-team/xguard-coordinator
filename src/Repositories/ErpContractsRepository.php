@@ -87,6 +87,7 @@ class ErpContractsRepository
                 'accessToEstablishment' => $erpContract->access_to_establishment,
                 'typeOfClothing' => $erpContract->type_of_clothing,
                 'requiredPermits' => $requiredPermits,
+                'protocols' => $erpContract->jobSite->protocols,
                 'addresses' => $erpContract->addresses->toArray()
             ];
         })->all();
