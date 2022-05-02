@@ -16,6 +16,8 @@ class JobSiteVisit extends Model
 
     const ID = 'id';
     const JOB_SITE_ID = 'job_site_id';
+    const ADDRESS_ID = 'address_id';
+    const IS_PRIMARY_ADDRESS = 'is_primary_address';
     const SUPERVISOR_SHIFT_ID = 'supervisor_shift_id';
     const START_TIME = 'start_time';
     const END_TIME = 'end_time';
