@@ -47,8 +47,8 @@ class OnSiteEmployeeRepositoryTest extends TestCase
             } else {
                 $jobSiteShift = factory(JobSiteShift::class)->create([
                     'contract_id' => $contract->id,
-                    'shift_start' => (Carbon::now())->subHours(self::EIGHT_HOURS),
-                    'shift_end' => (Carbon::now())->addHours(self::EIGHT_HOURS),
+                    'shift_start' => Carbon::now()->startOfDay(),
+                    'shift_end' => Carbon::now()->endOfDay(),
                 ]);
             }
             factory(UserShift::class)->create([
@@ -58,13 +58,13 @@ class OnSiteEmployeeRepositoryTest extends TestCase
             factory(Check::class)->create([
                 Check::USER_ID => $jobSiteShift->userShift->employee->id,
                 Check::JOB_SITE_SHIFT_ID => $jobSiteShift->id,
-                Check::CREATED_AT => \Carbon\Carbon::now(),
+                Check::CREATED_AT => Carbon::now()->endOfDay()->subHours(self::EIGHT_HOURS),
                 Check::TYPE => Checks::CHECKOUT()->getValue()
             ]);
             factory(Check::class)->create([
                 Check::USER_ID => $jobSiteShift->userShift->employee->id,
                 Check::JOB_SITE_SHIFT_ID => $jobSiteShift->id,
-                Check::CREATED_AT => \Carbon\Carbon::now()->subDay(),
+                Check::CREATED_AT => Carbon::now()->startOfDay()->addHours(self::EIGHT_HOURS),
                 Check::TYPE => Checks::CHECKIN()->getValue()
             ]);
         }
