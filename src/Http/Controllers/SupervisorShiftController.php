@@ -3,15 +3,24 @@
 namespace Xguard\Coordinator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-use Symfony\Component\HttpFoundation\Response as ResponseAlias;
-use Xguard\Coordinator\Http\Requests\SupervisorShiftRequest;
+use Illuminate\Http\Response as ResponseAlias;
+use Xguard\Coordinator\Http\Requests\SupervisorShiftPatchRequest;
+use Xguard\Coordinator\Http\Requests\SupervisorShiftPostRequest;
 use Xguard\Coordinator\Models\SupervisorShift;
 
+/**
+ * Class SupervisorShiftController
+ * @package Xguard\Coordinator\Http\Controllers
+ * @group Coordinator Plugin
+ */
 class SupervisorShiftController extends Controller
 {
-    public function store(SupervisorShiftRequest $request): \Illuminate\Http\Response
+    /**
+     * Create Supervisor Shift
+     * @response 201 {"id": 1}
+     * @response 400 {"message": "Error message description"}
+     */
+    public function store(SupervisorShiftPostRequest $request)
     {
         try {
             $shift = SupervisorShift::create([
@@ -20,16 +29,20 @@ class SupervisorShiftController extends Controller
                 SupervisorShift::START_LAT => $request->start_lat,
                 SupervisorShift::START_LNG => $request->start_lng
             ]);
-            return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
+            return response([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_CREATED);
         } catch (\Exception $e) {
             return response([
-                'success' => 'false',
                 'message' => $e->getMessage(),
-            ], 400);
+            ], ResponseAlias::HTTP_BAD_REQUEST);
         }
     }
 
-    public function update(SupervisorShiftRequest $request): \Illuminate\Http\Response
+    /**
+     * Update Supervisor Shift
+     * @response 200 {"id": 1}
+     * @response 400 {"message": "Error message description"}
+     */
+    public function update(SupervisorShiftPatchRequest $request)
     {
         $shift = SupervisorShift::find($request->id);
         $shift->fill([
@@ -38,6 +51,6 @@ class SupervisorShiftController extends Controller
             SupervisorShift::END_LNG => $request->end_lng
         ])->save();
         $shift->refresh();
-        return Response::make([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_OK);
+        return response([SupervisorShift::ID => $shift->id], ResponseAlias::HTTP_OK);
     }
 }

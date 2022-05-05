@@ -4,28 +4,44 @@ namespace Xguard\Coordinator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobSiteSubaddress;
-use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
-use Xguard\Coordinator\Http\Requests\JobSiteVisitRequest;
+use Xguard\Coordinator\Http\Requests\JobSiteVisitPatchRequest;
+use Xguard\Coordinator\Http\Requests\JobSiteVisitPostRequest;
 use Xguard\Coordinator\Models\JobSiteVisit;
+
+/**
+ * Class JobSiteVisitController
+ * @package Xguard\Coordinator\Http\Controllers
+ * @group Coordinator Plugin
+ */
 
 class JobSiteVisitController extends Controller
 {
-    public function store(JobSiteVisitRequest $request): \Illuminate\Http\Response
+    /**
+     * Create Job Site Visit
+     * @response 201 {"id": 1}
+     * @response 400 {"message": "Error message description"}
+     */
+    public function store(JobSiteVisitPostRequest $request)
     {
         $jobSiteVisit = JobSiteVisit::create([
             JobSiteVisit::SUPERVISOR_SHIFT_ID => $request->supervisor_shift_id,
             JobSiteVisit::JOB_SITE_ID => $request->is_primary_address?  $request->address_id : JobSiteSubaddress::find($request->address_id)->id,
             JobSiteVisit::START_TIME => $request->start_time
         ]);
-        return Response::make([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_CREATED);
+        return response([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_CREATED);
     }
 
-    public function update(JobSiteVisitRequest $request): \Illuminate\Http\Response
+    /**
+     * Update Job Site Visit
+     * @response 201 {"id": 1}
+     * @response 400 {"message": "Error message description"}
+     */
+    public function update(JobSiteVisitPatchRequest $request)
     {
         $jobSiteVisit = JobSiteVisit::find($request->id);
         $jobSiteVisit->fill([JobSiteVisit::END_TIME => $request->end_time])->save();
         $jobSiteVisit->refresh();
-        return Response::make([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_OK);
+        return response([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_OK);
     }
 }

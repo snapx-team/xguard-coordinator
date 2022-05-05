@@ -75,24 +75,14 @@ class OnSiteEmployeeRepositoryTest extends TestCase
     public function testGetAllEmployeesFromJobSite()
     {
         $jobSite = $this->setUpJobSiteShiftsAndReturnJobSite();
-        $data = [
-            'id' => $jobSite->id,
-            'isPrimaryAddress' => true,
-        ];
-
-        $employees = OnSiteEmployeeRepository::getOnSiteEmployees($data);
+        $employees = OnSiteEmployeeRepository::getOnSiteEmployees($jobSite->id, true);
         $this->assertCount(self::MAX_JOB_SITE, $employees);
     }
 
     public function testDontGetEmployeesFromJobSiteIfJobSiteShiftNotWithinSelectedDateTime()
     {
         $jobSite = $this->setUpJobSiteShiftsAndReturnJobSite(true);
-        $data = [
-            'id' => $jobSite->id,
-            'isPrimaryAddress' => true,
-        ];
-
-        $employees = OnSiteEmployeeRepository::getOnSiteEmployees($data);
+        $employees = OnSiteEmployeeRepository::getOnSiteEmployees($jobSite->id, true);
         $this->assertCount(self::ZERO, $employees);
     }
 }

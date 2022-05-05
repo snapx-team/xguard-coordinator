@@ -78,11 +78,4 @@ class SupervisorShiftRoutesTest extends TestCase
         $response = $this->post($apiCall, $data);
         $response->assertJsonValidationErrors([SupervisorShift::USER_ID]);
     }
-
-    public function testStartOrEndTimeIsRequiredValidations()
-    {
-        $apiCall = route(self::COORDINATOR_UPDATE_SHIFT);
-        $response = $this->patch($apiCall, []);
-        $response->assertJsonValidationErrors([SupervisorShift::START_TIME, SupervisorShift::END_TIME]);
-    }
 }
