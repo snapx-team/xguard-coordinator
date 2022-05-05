@@ -33,8 +33,8 @@ Route::group(['prefix' => 'coordinator', 'as' => 'coordinator'], function () {
                 //ERP Data
                 Route::get('/get-all-users', 'ErpController@getAllUsers');
                 Route::get('/get-some-users/{searchTerm}', 'ErpController@getSomeUsers');
-                Route::get('/get-all-contracts', 'ErpController@getAllActiveContracts');
-                Route::get('/get-some-contracts/{searchTerm}', 'ErpController@getSomeActiveContracts');
+                Route::get('/get-all-active-contracts', 'ErpController@getAllActiveContracts');
+                Route::get('/get-some-active-contracts/{searchTerm}', 'ErpController@getSomeActiveContracts');
             });
         });
     });

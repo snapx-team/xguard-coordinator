@@ -1,0 +1,32 @@
+{
+    "name": "Employee Name",
+    "lateCheckinMinutes": 10,
+    "earlyCheckoutMinutes": 20,
+    "checkin": "2022-05-05 08:00:00",
+    "checkout": "2022-05-05 15:59:59",
+    "securityLicenseStatus": "Temporary, Full, Expired, ...",
+    "securityLicenseNumber": 123,
+    "shiftCategory": "Shift category name",
+    "contactInfo": {
+        "email": "test@test.test",
+        "phoneLines": {
+            "tel1": {
+                "number": "555-555-5555",
+                "textEnabled": true
+            },
+            "tel2": {
+                "number": "333-333-3333",
+                "textEnabled": true
+            }
+        }
+    },
+    "disciplinaryActions": [],
+    "contractName": "Contract name",
+    "shiftStart": "2022-05-05 00:00:00",
+    "shiftEnd": "2022-05-05 23:59:59",
+    "shiftAddress": {
+        "address": "123 fake street, QC, Canada",
+        "lng": "-73.6542803",
+        "lat": "45.5451245"
+    }
+}

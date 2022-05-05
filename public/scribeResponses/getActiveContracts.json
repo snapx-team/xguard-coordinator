@@ -1,0 +1,40 @@
+[
+    {
+        "id": 124,
+        "name": "Contract Name",
+        "jobSiteImagePath": "job_site_images/123/123.png",
+        "onSiteClientContactName": "John Doe",
+        "onSiteClientContactPhone": "555 555 5555",
+        "onSiteClientPosition": "Posisiton Name",
+        "onSiteClientEmail": "test@test.com",
+        "clientNeeds": "Client's specified needs",
+        "clientType": "Client type",
+        "jobSiteType": "Job site type",
+        "workEnvironment": "Work environment",
+        "addedXguardServices": "Added xguard services",
+        "accessToEstablishment": "Access eo establishement",
+        "typeOfClothing": "Type of clothing",
+        "requiredPermits": [
+            "bsp",
+            "asp",
+            "..."
+        ],
+        "protocols": "https://docs.google.com/document/d/123",
+        "addresses": [
+            {
+                "id": 123,
+                "address": "123 test street, QC, Canada",
+                "lat": 45.6945498,
+                "lng": -73.4874364,
+                "isPrimaryAddress": true
+            },
+            {
+                "id": 49,
+                "address": "321 test street, QC, Canada",
+                "lat": 38.9282484,
+                "lng": -94.6623129,
+                "isPrimaryAddress": false
+            }
+        ]
+    }
+]

@@ -89,23 +89,14 @@ class JobSiteVisitRoutesTest extends TestCase
         $response->assertOk();
     }
 
-    public function testValidSupervisorShiftIdAndJobSiteShiftIdValidations()
+    public function testValidValidations()
     {
         $apiCall = route(self::CREATE_JOB_SITE_SHIFT_VISIT);
         $data = [
             JobSiteVisit::SUPERVISOR_SHIFT_ID => self::INVALID_ID,
             JobSiteVisit::ID => self::INVALID_ID,
-            JobSiteVisit::END_TIME => $this->faker->date(),
         ];
-        $response = $this->patch($apiCall, $data);
-        $response->assertJsonValidationErrors([JobSiteVisit::SUPERVISOR_SHIFT_ID, JobSiteVisit::ID]);
-    }
-
-    public function testTimeStartOrTimeEndIsRequiredValidations()
-    {
-        $jobSiteVisit = factory(JobSiteVisit::class)->create();
-        $apiCall = route(self::UPDATE_JOB_SITE_SHIFT_VISIT);
-        $response = $this->patch($apiCall, [JobSiteVisit::ID => $jobSiteVisit->id]);
-        $response->assertJsonValidationErrors([JobSiteVisit::START_TIME, JobSiteVisit::END_TIME]);
+        $response = $this->post($apiCall, $data);
+        $response->assertJsonValidationErrors([JobSiteVisit::SUPERVISOR_SHIFT_ID, JobSiteVisit::IS_PRIMARY_ADDRESS, JobSiteVisit::START_TIME, JobSiteVisit::ADDRESS_ID]);
     }
 }

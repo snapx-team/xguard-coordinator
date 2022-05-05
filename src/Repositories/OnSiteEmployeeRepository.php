@@ -5,27 +5,27 @@ namespace Xguard\Coordinator\Repositories;
 use App\Models\JobSite;
 use App\Models\JobSiteSubaddress;
 use Carbon\Carbon;
+use Xguard\Coordinator\Models\JobSiteVisit;
 
 class OnSiteEmployeeRepository
 {
     const ID = 'id';
-    const IS_PRIMARY_ADDRESS = 'isPrimaryAddress';
     const CONTRACTS_SHIFTS_USER_SHIFT_EMPLOYEE = 'contracts.shifts.userShift.employee';
     const CONTRACTS = 'contracts';
     const SHIFTS = 'shifts';
     const SHIFT_START = 'shift_start';
 
-    public static function getOnSiteEmployees(array $payload)
+    public static function getOnSiteEmployees(int $id, bool $isPrimaryAddress)
     {
-        $jobSiteId = $payload[self::ID];
-        if (!$payload[self::IS_PRIMARY_ADDRESS]) {
-            $jobSiteId = JobSiteSubaddress::find($payload[self::ID])->job_site_id;
+        $jobSiteId = $id;
+        if (!$isPrimaryAddress) {
+            $jobSiteId = JobSiteSubaddress::find($id)->job_site_id;
         }
 
         $jobSite = JobSite::with(self::CONTRACTS_SHIFTS_USER_SHIFT_EMPLOYEE)
             ->where(JobSite::ID, '=', $jobSiteId)
-            ->whereHas(self::CONTRACTS, function ($q) use ($payload) {
-                $q->whereHas(self::SHIFTS, function ($q) use ($payload) {
+            ->whereHas(self::CONTRACTS, function ($q) {
+                $q->whereHas(self::SHIFTS, function ($q) {
                     $q->whereDate(self::SHIFT_START, '=', Carbon::today());
                 });
             })->first();

@@ -66,11 +66,4 @@ class OdometerRoutesTest extends TestCase
         $response = $this->post($apiCall, $data);
         $response->assertJsonValidationErrors([Odometer::SUPERVISOR_SHIFT_ID]);
     }
-
-    public function testStartOdometerOrEndOdometerTimeIsRequiredValidations()
-    {
-        $apiCall = route(self::SUPERVISOR_UPDATE_ODOMETER);
-        $response = $this->patch($apiCall, []);
-        $response->assertJsonValidationErrors([Odometer::START_ODOMETER, Odometer::END_ODOMETER]);
-    }
 }
