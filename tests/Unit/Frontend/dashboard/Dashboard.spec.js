@@ -48,27 +48,27 @@ describe('Dashboard.vue', () => {
             'lng': -75.159036
         };
 
-        expect(wrapper.vm.showDataPane).toBe(false);
-        expect(wrapper.vm.currentMarkerIndex).toBe(null);
-        expect(wrapper.vm.infoPosition).toBe(null);
+        expect(wrapper.vm.rightPaneData.showDataPane).toBe(false);
+        expect(wrapper.vm.mapPaneData.currentMarkerIndex).toBe(null);
+        expect(wrapper.vm.mapPaneData.infoPosition).toBe(null);
         wrapper.vm.openWindow(marker, 1);
-        expect(wrapper.vm.showDataPane).toBe(true);
-        expect(wrapper.vm.currentMarkerIndex).toBe(1);
-        expect(wrapper.vm.infoPosition).toMatchObject(infoPosition);
+        expect(wrapper.vm.rightPaneData.showDataPane).toBe(true);
+        expect(wrapper.vm.mapPaneData.currentMarkerIndex).toBe(1);
+        expect(wrapper.vm.mapPaneData.infoPosition).toMatchObject(infoPosition);
     });
 
     it('setJobSiteMarkers formats data properly for google maps', () => {
 
-        expect(wrapper.vm.googleMapRefreshKey).toBe(0);
-        expect(wrapper.vm.showDataPane).toBe(false);
-        wrapper.vm.showDataPaneInfo(supervisorMockData().supervisorShifts);
-        expect(wrapper.vm.showDataPane).toBe(true); // data pane must open
-        expect(wrapper.vm.googleMapRefreshKey).toBe(1); // refresh key must increment by 1
-        expect(wrapper.vm.allJobSiteVisits.length).toBe(3); // an array of all job site visits must be created
-        expect(wrapper.vm.allJobSiteVisits.length).toBe(3); // an array of all job site visits must be created
+        expect(wrapper.vm.mapPaneData.googleMapRefreshKey).toBe(0);
+        expect(wrapper.vm.rightPaneData.showDataPane).toBe(false);
+        wrapper.vm.showSupervisorShifts(supervisorMockData().supervisorShifts);
+        wrapper.vm.showDataPaneInfo(supervisorMockData().supervisorShifts[0]);
+        expect(wrapper.vm.rightPaneData.showDataPane).toBe(true);
+        expect(wrapper.vm.mapPaneData.googleMapRefreshKey).toBe(1);
+        expect(wrapper.vm.selectedSupervisorShifts.length).toBe(2);
 
         // testing that job site markers are formatted correctly
-        expect(wrapper.vm.jobSiteMarkers).toEqual(
+        expect(wrapper.vm.mapPaneData.jobSiteMarkers).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
                     'address': '9494 boulevard st-laurent',
