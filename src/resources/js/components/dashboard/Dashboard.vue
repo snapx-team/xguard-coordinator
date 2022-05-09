@@ -25,8 +25,8 @@
             <div>
                 <div>
                     <button
-                        v-if="!showSupervisorPane"
-                        @click="showSupervisorPane = !showSupervisorPane"
+                        v-if="!leftPaneData.showSupervisorPane"
+                        @click="leftPaneData.showSupervisorPane = !leftPaneData.showSupervisorPane"
                         class="py-4 font-semibold text-indigo-600 hover:text-indigo-800 transition duration-300 ease-in-out focus:outline-none">
                         Show Supervisors
                         <i class="fa fa-th-large ml-2"></i>
@@ -34,38 +34,64 @@
                 </div>
                 <div class="h-full">
                     <splitpanes class="default-theme">
-                        <pane :size="20" min-size="15" :max-size="35" v-if="showSupervisorPane" class="bg-indigo-50">
+                        <pane :size="20" min-size="15" :max-size="35" v-if="leftPaneData.showSupervisorPane"
+                              class="bg-indigo-50">
                             <div class="flex flex-wrap flex-col">
                                 <div class="flex justify-between p-2 bg-indigo-800 border-b">
-                                    <h1 class="text-white">Supervisors</h1>
+
+                                    <div class="flex items-center">
+                                        <button class="bg-indigo-700 hover:bg-indigo-500 transition duration-150 ease-in-out rounded px-2 py-1 mr-2" v-if="leftPaneData.panelName === leftPaneData.panelNames.shifts" @click="previousPanel()">
+                                            <i class="fas fa-arrow-left text-white"></i>
+                                        </button>
+                                        <h1 class="text-white">{{ leftPaneData.panelName }}</h1>
+
+                                    </div>
                                     <div>
-                                        <button @click="showSupervisorPane = !showSupervisorPane"
+                                        <button @click="leftPaneData.showSupervisorPane = !leftPaneData.showSupervisorPane"
                                                 class="focus:outline-none flex flex-col items-center text-gray-400 hover:text-gray-500 transition duration-150 ease-in-out pl-8"
                                                 type="button">
                                             <i class="fas fa-times"></i>
                                             <span
-                                                class="text-xs font-semibold text-center leading-3 uppercase">Esc</span>
+                                                class="text-xs font-semibold text-center leading-3 uppercase p-1">Esc</span>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="py-3 overflow-auto" style="height:550px;">
-                                    <user-card
-                                        v-for="supervisor in supervisorsData"
-                                        :key="supervisor.id"
-                                        :supervisor="supervisor"
-                                        @click.native="showDataPaneInfo(supervisor.supervisorShifts)"
-                                    ></user-card>
+
+                                    <transition mode="out-in"
+                                                :name="this.leftPaneData.transitionName">
+
+                                        <div class="block" v-if="leftPaneData.panelName === leftPaneData.panelNames.supervisors"
+                                             key="1">
+                                            <user-card
+                                                v-for="supervisor in supervisorsData"
+                                                :key="supervisor.id"
+                                                :supervisor="supervisor"
+                                                @click.native="showSupervisorShifts(supervisor.supervisorShifts)"
+                                            ></user-card>
+                                        </div>
+
+                                        <div class="block"
+                                             v-if="leftPaneData.panelName === leftPaneData.panelNames.shifts" key="2">
+                                            <shiftCard
+                                                v-for="(shift, index) in selectedSupervisorShifts"
+                                                :shift = shift
+                                                :key="index"
+                                                @click.native="showDataPaneInfo(shift)">
+                                                {{ shift.startTime }}
+                                            </shiftCard>
+                                        </div>
+                                    </transition>
                                 </div>
                             </div>
                         </pane>
                         <pane :size="50" class="flex-grow">
                             <div>
-
-                                <gmap-map id="map" v-bind="options" :key="googleMapRefreshKey">
+                                <gmap-map id="map" v-bind="mapPaneData.options" :key="mapPaneData.googleMapRefreshKey">
 
                                     <gmap-marker
                                         :key="index"
-                                        v-for="(m, index) in jobSiteMarkers"
+                                        v-for="(m, index) in mapPaneData.jobSiteMarkers"
                                         :position="m.position"
                                         :icon="m.icon"
                                         :clickable="true"
@@ -74,37 +100,40 @@
                                     />
 
                                     <gmap-info-window
-                                        @closeclick="window_open=false"
-                                        :opened="window_open"
-                                        :position="infoPosition"
-                                        :options="infoOptions"
+                                        @closeclick="mapPaneData.window_open=false"
+                                        :opened="mapPaneData.window_open"
+                                        :position="mapPaneData.infoPosition"
+                                        :options="mapPaneData.infoOptions"
                                     >
 
                                     </gmap-info-window>
                                 </gmap-map>
                             </div>
                         </pane>
-                        <pane :size="20" min-size="15" :max-size="35" v-if="showDataPane" class="bg-indigo-50">
+                        <pane :size="20" min-size="15" :max-size="35" v-if="rightPaneData.showDataPane"
+                              class="bg-indigo-50 h-max">
                             <div class="flex flex-wrap flex-col">
                                 <div class="flex justify-between p-2 bg-indigo-800 border-b">
                                     <h1 class="text-white">Data</h1>
                                     <div>
-                                        <button @click="showDataPane = !showDataPane"
+                                        <button @click="rightPaneData.showDataPane = !rightPaneData.showDataPane"
                                                 class="focus:outline-none flex flex-col items-center text-gray-400 hover:text-gray-500 transition duration-150 ease-in-out pl-8"
                                                 type="button">
                                             <i class="fas fa-times"></i>
                                             <span
-                                                class="text-xs font-semibold text-center leading-3 uppercase">Esc</span>
+                                                class="text-xs font-semibold text-center leading-3 uppercase p-1">Esc</span>
                                         </button>
                                     </div>
                                 </div>
-                                <div class="py-3">
+                                <div class="py-3 h-auto">
+
                                     <job-site-card
-                                        v-for="(jobSiteMarker, index) in jobSiteMarkers"
+                                        v-for="(jobSiteMarker, index) in mapPaneData.jobSiteMarkers"
                                         :key="index"
                                         :jobSiteMarker="jobSiteMarker"
                                         @click.native="openWindow(jobSiteMarker, index)"
                                     ></job-site-card>
+
                                 </div>
                             </div>
                         </pane>
@@ -125,12 +154,14 @@ import Avatar from "../global/Avatar.vue";
 import UserCard from "./dashboardComponents/UserCard";
 import {gmapApi} from "vue2-google-maps";
 import JobSiteCard from "./dashboardComponents/JobSiteCard";
+import ShiftCard from "./dashboardComponents/shiftCard";
 
 export default {
 
     inject: ["eventHub"],
 
     components: {
+        ShiftCard,
         Splitpanes,
         Pane,
         vSelect,
@@ -142,35 +173,53 @@ export default {
 
     mounted() {
         this.getSupervisorsData();
+        this.leftPaneData.panelName = this.leftPaneData.panelNames.supervisors;
+        this.leftPaneData.transitionName = this.leftPaneData.transitionNames.next;
     },
 
     data() {
         return {
-            googleMapRefreshKey: 0,
-            allJobSiteVisits: null,
             supervisorsData: null,
-            jobSiteMarkers: [],
             selectedDate: new Date(),
-            showSupervisorPane: true,
-            showDataPane: false,
-            options: {
-                zoom: 11,
-                center: {
-                    lat: 45.533550,
-                    lng: -73.602119,
+            selectedSupervisorShifts: [],
+            mapPaneData:{
+                jobSiteMarkers: [],
+                googleMapRefreshKey: 0,
+                options: {
+                    zoom: 11,
+                    center: {
+                        lat: 45.533550,
+                        lng: -73.602119,
+                    },
                 },
-            },
-            infoPosition: null,
-            infoOptions: {
-                pixelOffset: {
-                    width: 0,
-                    height: -35,
+                infoPosition: null,
+                infoOptions: {
+                    pixelOffset: {
+                        width: 0,
+                        height: -35,
+                    },
+                    maxWidth: 200,
+                    content: null,
                 },
-                maxWidth: 200,
-                content: null,
+                window_open: false,
+                currentMarkerIndex: null,
             },
-            window_open: false,
-            currentMarkerIndex: null,
+            rightPaneData:{
+                showDataPane: false,
+            },
+            leftPaneData: {
+                showSupervisorPane: true,
+                transitionName: "",
+                panelName: "",
+                panelNames: {
+                    supervisors: "Supervisors",
+                    shifts: "Shifts"
+                },
+                transitionNames: {
+                    next: "next",
+                    previous: "previous"
+                }
+            }
         };
     },
 
@@ -179,6 +228,16 @@ export default {
     },
 
     methods: {
+        nextPanel() {
+            this.leftPaneData.transitionName = this.leftPaneData.transitionNames.next;
+            this.leftPaneData.panelName = this.leftPaneData.panelNames.shifts;
+
+        },
+        previousPanel() {
+            this.leftPaneData.transitionName = this.leftPaneData.transitionNames.previous;
+            this.leftPaneData.panelName = this.leftPaneData.panelNames.supervisors;
+        },
+
         getSupervisorsData() {
             this.eventHub.$emit("set-loading-state", true);
             this.asyncGetSupervisorsData().then((data) => {
@@ -187,22 +246,32 @@ export default {
             });
         },
 
-        showDataPaneInfo(supervisorShifts) {
-            this.showDataPane = true;
-            this.allJobSiteVisits = supervisorShifts.flatMap((e) => e.jobSiteVisits);
+        showSupervisorShifts(supervisorShifts) {
+            if(supervisorShifts.length > 0){
+                this.selectedSupervisorShifts = supervisorShifts;
+                this.nextPanel();
+            }
+            else{
+                this.triggerInfoToast('This user has no shifts in this time span');
+            }
+        },
+
+        showDataPaneInfo(supervisorShift) {
+            this.rightPaneData.showDataPane = true;
+            this.selectedJobSiteVisits = supervisorShift.jobSiteVisits;
             this.setJobSiteMarkers();
-            this.googleMapRefreshKey++;
+            this.mapPaneData.googleMapRefreshKey++;
         },
 
         setJobSiteMarkers() {
-            this.jobSiteMarkers =  this.allJobSiteVisits.map( e => ({
+            this.mapPaneData.jobSiteMarkers = this.selectedJobSiteVisits.map(e => ({
                 label: {
                     text: (e.jobSite.contracts[0].id).toString(),
                     color: "#fff",
                     fontWeight: "bold",
                     fontSize: "14px",
                 },
-                position: { lat: parseFloat(e.address.lat), lng: parseFloat(e.address.lng) },
+                position: {lat: parseFloat(e.address.lat), lng: parseFloat(e.address.lng)},
                 name: e.jobSite.contracts[0].name,
                 address: e.address.name
             }));
@@ -216,9 +285,9 @@ export default {
         },
         openWindow(marker, index) {
 
-            this.showDataPane = true;
-            this.infoPosition = this.getPosition(marker);
-            this.infoOptions.content =
+            this.rightPaneData.showDataPane = true;
+            this.mapPaneData.infoPosition = this.getPosition(marker);
+            this.mapPaneData.infoOptions.content =
                 '<div class="">' +
                 '<p class="font-semibold">' +
                 marker.name +
@@ -228,11 +297,11 @@ export default {
                 '</p>' +
                 '</div>';
 
-            if (this.currentMarkerIndex === index) {
-                this.window_open = !this.window_open;
+            if (this.mapPaneData.currentMarkerIndex === index) {
+                this.mapPaneData.window_open = !this.mapPaneData.window_open;
             } else {
-                this.window_open = true;
-                this.currentMarkerIndex = index;
+                this.mapPaneData.window_open = true;
+                this.mapPaneData.currentMarkerIndex = index;
             }
         },
     },
@@ -240,6 +309,11 @@ export default {
 </script>
 
 <style scoped>
+
+.splitpanes__pane {
+    height: auto;
+}
+
 #map {
     height: 600px;
     width: 100%;
@@ -249,4 +323,41 @@ export default {
 .list-inline-item {
     cursor: pointer;
 }
+
+.next-leave, .previous-leave {
+    opacity: 1;
+}
+
+.next-leave-active, .previous-leave-active {
+    transition: all .2s ease
+}
+
+.next-leave-to {
+    opacity: 0;
+    transform: translateX(-50px);
+}
+
+.next-enter {
+    opacity: 0;
+    transform: translateX(50px);
+}
+
+.next-enter-active, .previous-enter-active {
+    transition: all .2s ease
+}
+
+.next-enter-to, .previous-enter-to {
+    opacity: 1;
+}
+
+.previous-leave-to {
+    opacity: 0;
+    transform: translateX(50px);
+}
+
+.previous-enter {
+    opacity: 0;
+    transform: translateX(-50px);
+}
+
 </style>
