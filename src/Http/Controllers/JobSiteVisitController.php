@@ -44,4 +44,22 @@ class JobSiteVisitController extends Controller
         $jobSiteVisit->refresh();
         return response([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_OK);
     }
+
+    /**
+     * Delete Job Site Visit
+     * @response 201 {"success": "true"}
+     * @response 400 {"message": "Error message description"}
+     */
+    public function delete($id)
+    {
+        try {
+            $jobSiteVisit = JobSiteVisit::find($id);
+            $jobSiteVisit->delete();
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+        return response(['success' => 'true'], ResponseAlias::HTTP_OK);
+    }
 }

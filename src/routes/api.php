@@ -20,6 +20,7 @@ Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function (
 
         Route::post('/job-site-visit', 'JobSiteVisitController@store')->name('.create-job-site-visit');
         Route::patch('/job-site-visit', 'JobSiteVisitController@update')->name('.update-job-site-visit');
+        Route::delete('/job-site-visit/{visitId}', 'JobSiteVisitController@delete')->name('.delete-job-site-visit');
 
         Route::get('/get-all-active-contracts', 'ErpController@getAllActiveContracts');
         Route::get('/get-some-active-contracts/{searchTerm}', 'ErpController@getSomeActiveContracts');
