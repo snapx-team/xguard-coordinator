@@ -21,6 +21,7 @@ class JobSiteVisitRoutesTest extends TestCase
 
     const CREATE_JOB_SITE_SHIFT_VISIT = 'coordinator.create-job-site-visit';
     const UPDATE_JOB_SITE_SHIFT_VISIT = 'coordinator.update-job-site-visit';
+    const DELETE_JOB_SITE_SHIFT_VISIT = 'coordinator.delete-job-site-visit';
     const JOB_SITE_ID = 'job_site_id';
     const ADDRESS = 'address';
     const FORMATTED_ADDRESS = 'formatted_address';
@@ -87,6 +88,16 @@ class JobSiteVisitRoutesTest extends TestCase
         ];
         $response = $this->patch($apiCall, $data);
         $response->assertOk();
+    }
+
+    public function testDeleteJobSiteVisit()
+    {
+        $jobSiteVisit = factory(JobSiteVisit::class)->create();
+        $apiCall = route(self::DELETE_JOB_SITE_SHIFT_VISIT, ['visitId' => $jobSiteVisit->id]);
+        $this->assertDatabaseHas('sa_job_site_visits', ['id' => $jobSiteVisit->id, 'deleted_at' => null]);
+        $response = $this->delete($apiCall);
+        $response->assertOk();
+        $this->assertDatabaseMissing('sa_job_site_visits', ['id' => $jobSiteVisit->id, 'deleted_at' => null]);
     }
 
     public function testValidValidations()
