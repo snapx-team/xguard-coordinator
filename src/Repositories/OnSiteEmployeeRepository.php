@@ -49,7 +49,7 @@ class OnSiteEmployeeRepository
             });
 
             return [
-                'name' => $shift->userShift->employee->full_name,
+                'name' => $shift->userShift->employee->getFullNameAttribute(),
                 'lateCheckinMinutes' => Carbon::parse($shift->getCheckinAttribute())->isAfter($shift->shift_start) ? Carbon::parse($shift->getCheckinAttribute())->diffInMinutes($shift->shift_start) : 0,
                 'earlyCheckoutMinutes' => Carbon::parse($shift->getCheckoutAttribute())->isBefore($shift->shift_end) ? Carbon::parse($shift->getCheckoutAttribute())->diffInMinutes($shift->shift_end) : 0,
                 'checkin' => $shift->getCheckinAttribute(),
