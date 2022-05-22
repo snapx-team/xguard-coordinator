@@ -10,9 +10,10 @@ use Xguard\Coordinator\Models\JobSiteVisit;
 class OnSiteEmployeeRepository
 {
     const ID = 'id';
-    const CONTRACTS_SHIFTS_USER_SHIFT_EMPLOYEE = 'contracts.shifts.userShift.employee';
     const CONTRACTS = 'contracts';
     const SHIFTS = 'shifts';
+    const USER_SHIFT = 'userShift';
+    const EMPLOYEE = 'employee';
     const SHIFT_START = 'shift_start';
 
     public static function getOnSiteEmployees(int $id, bool $isPrimaryAddress)
@@ -22,13 +23,23 @@ class OnSiteEmployeeRepository
             $jobSiteId = JobSiteSubaddress::find($id)->job_site_id;
         }
 
-        $jobSite = JobSite::with(self::CONTRACTS_SHIFTS_USER_SHIFT_EMPLOYEE)
-            ->where(JobSite::ID, '=', $jobSiteId)
-            ->whereHas(self::CONTRACTS, function ($q) {
-                $q->whereHas(self::SHIFTS, function ($q) {
-                    $q->whereDate(self::SHIFT_START, '=', Carbon::today());
-                });
-            })->first();
+        $jobSite = JobSite::where(JobSite::ID, '=', $jobSiteId)
+            ->whereHas(self::CONTRACTS)->with([
+                'contracts' => function ($q) {
+                    $q->whereHas(self::SHIFTS);
+                    $q->with([
+                        'shifts' => function ($q) {
+                            $q->whereHas(self::USER_SHIFT);
+                            $q->whereDate(self::SHIFT_START, Carbon::today());
+                            $q->with(['userShift'=> function ($q) {
+                                $q->whereHas(self::EMPLOYEE);
+                                $q->with(['employee']);
+                            }]);
+                        }
+                    ]);
+                }
+            ])
+            ->first();
 
         return $jobSite ? self::formatEmployeesFromJobSite($jobSite) : [];
     }
@@ -36,20 +47,18 @@ class OnSiteEmployeeRepository
     private static function formatEmployeesFromJobSite($jobSite)
     {
         $contract = $jobSite->contracts->first();
-
         return $contract->shifts->map(function ($shift) use ($contract) {
-
             $disciplinaryActions = $shift->userShift->employee->disciplinaryActions->map(function ($action) {
                 return [
                     'dateOfInfraction' => $action->date_of_infraction,
                     'notes' => $action->notes,
                     'type' => $action->disciplinary_action,
-                    'createdBy' => $action->createdBy->full_name
+                    'createdBy' => $action->createdBy->getFullNameAttribute(),
                 ];
             });
 
             return [
-                'name' => $shift->userShift->employee->full_name,
+                'name' => $shift->userShift->employee->getFullNameAttribute(),
                 'lateCheckinMinutes' => Carbon::parse($shift->getCheckinAttribute())->isAfter($shift->shift_start) ? Carbon::parse($shift->getCheckinAttribute())->diffInMinutes($shift->shift_start) : 0,
                 'earlyCheckoutMinutes' => Carbon::parse($shift->getCheckoutAttribute())->isBefore($shift->shift_end) ? Carbon::parse($shift->getCheckoutAttribute())->diffInMinutes($shift->shift_end) : 0,
                 'checkin' => $shift->getCheckinAttribute(),
