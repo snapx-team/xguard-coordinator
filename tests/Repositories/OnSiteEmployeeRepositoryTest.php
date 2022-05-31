@@ -5,6 +5,7 @@ namespace Tests\Unit\Repositories;
 use App\Enums\Checks;
 use App\Models\Check;
 use App\Models\Contract;
+use App\Models\Evaluation;
 use App\Models\JobSite;
 use App\Models\JobSiteShift;
 use App\Models\User;
@@ -23,6 +24,7 @@ class OnSiteEmployeeRepositoryTest extends TestCase
     const MAX_JOB_SITE = 10;
     const ZERO = 0;
     const EIGHT_HOURS = 8;
+    const FIVE = 5;
 
     public function setUp(): void
     {
@@ -51,7 +53,20 @@ class OnSiteEmployeeRepositoryTest extends TestCase
                     'shift_end' => Carbon::now()->endOfDay(),
                 ]);
             }
+            $newUser = factory(User::class)->create();
+
+            Evaluation::create([
+                'user_id' => $newUser->id,
+                'work_quality' => self::FIVE,
+                'punctuality' => self::FIVE,
+                'team_work' => self::FIVE,
+                'follows_directions' => self::FIVE,
+                'communication' => self::FIVE,
+                'average' => self::FIVE,
+            ]);
+
             factory(UserShift::class)->create([
+                'user_id' => $newUser->id,
                 'job_site_shift_id' => $jobSiteShift->id,
             ]);
 
@@ -68,7 +83,6 @@ class OnSiteEmployeeRepositoryTest extends TestCase
                 Check::TYPE => Checks::CHECKIN()->getValue()
             ]);
         }
-
         return $jobSite;
     }
 

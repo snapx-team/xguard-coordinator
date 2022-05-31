@@ -22,7 +22,6 @@ class OnSiteEmployeeRepository
         if (!$isPrimaryAddress) {
             $jobSiteId = JobSiteSubaddress::find($id)->job_site_id;
         }
-
         $jobSite = JobSite::where(JobSite::ID, '=', $jobSiteId)
             ->whereHas(self::CONTRACTS)->with([
                 'contracts' => function ($q) {
@@ -31,16 +30,20 @@ class OnSiteEmployeeRepository
                         'shifts' => function ($q) {
                             $q->whereHas(self::USER_SHIFT);
                             $q->whereDate(self::SHIFT_START, Carbon::today());
-                            $q->with(['userShift'=> function ($q) {
-                                $q->whereHas(self::EMPLOYEE);
-                                $q->with(['employee']);
-                            }]);
+                            $q->with([
+                                'userShift' => function ($q) {
+                                    $q->whereHas(self::EMPLOYEE);
+                                    $q->with([
+                                        'employee' => function ($q) {
+                                            $q->with(['userEvaluation']);
+                                        }
+                                    ]);
+                                }
+                            ]);
                         }
                     ]);
                 }
-            ])
-            ->first();
-
+            ])->first();
         return $jobSite ? self::formatEmployeesFromJobSite($jobSite) : [];
     }
 
@@ -50,6 +53,7 @@ class OnSiteEmployeeRepository
         return $contract->shifts->map(function ($shift) use ($contract) {
             $disciplinaryActions = $shift->userShift->employee->disciplinaryActions->map(function ($action) {
                 return [
+                    'id' => $action->id,
                     'dateOfInfraction' => $action->date_of_infraction,
                     'notes' => $action->notes,
                     'type' => $action->disciplinary_action,
@@ -58,6 +62,7 @@ class OnSiteEmployeeRepository
             });
 
             return [
+                'id' => $shift->userShift->employee->id,
                 'name' => $shift->userShift->employee->getFullNameAttribute(),
                 'lateCheckinMinutes' => Carbon::parse($shift->getCheckinAttribute())->isAfter($shift->shift_start) ? Carbon::parse($shift->getCheckinAttribute())->diffInMinutes($shift->shift_start) : 0,
                 'earlyCheckoutMinutes' => Carbon::parse($shift->getCheckoutAttribute())->isBefore($shift->shift_end) ? Carbon::parse($shift->getCheckoutAttribute())->diffInMinutes($shift->shift_end) : 0,
@@ -78,6 +83,15 @@ class OnSiteEmployeeRepository
                             'textEnabled' => $shift->userShift->employee->tel_2_can_receive_texts,
                         ],
                     ],
+                ],
+                'evaluation' => [
+                    'id' => $shift->userShift->employee->userEvaluation->id,
+                    'workQuality' => $shift->userShift->employee->userEvaluation->work_quality,
+                    'punctuality' => $shift->userShift->employee->userEvaluation->punctuality,
+                    'teamwork' => $shift->userShift->employee->userEvaluation->team_work,
+                    'followsDirection' => $shift->userShift->employee->userEvaluation->follows_directions,
+                    'communication' => $shift->userShift->employee->userEvaluation->communication,
+                    'average' => $shift->userShift->employee->userEvaluation->average,
                 ],
                 'disciplinaryActions' => $disciplinaryActions->toArray(),
                 'contractName' => $contract->contract_identifier,
