@@ -6,6 +6,7 @@ use App\Models\JobSite;
 use App\Models\JobSiteSubaddress;
 use Carbon\Carbon;
 use Xguard\Coordinator\Models\JobSiteVisit;
+use Xguard\Coordinator\Models\Review;
 
 class OnSiteEmployeeRepository
 {
@@ -61,6 +62,8 @@ class OnSiteEmployeeRepository
                 ];
             });
 
+            $review = Review::where(Review::USER_SHIFT_ID, $shift->userShift->id)->first();
+
             return [
                 'id' => $shift->userShift->employee->id,
                 'name' => $shift->userShift->employee->getFullNameAttribute(),
@@ -84,6 +87,11 @@ class OnSiteEmployeeRepository
                         ],
                     ],
                 ],
+                'review' => $review ? [
+                    'id' => $review->id,
+                    'rating' => $review->rating,
+                    'note' => $review->note,
+                ] : null,
                 'evaluation' => [
                     'id' => $shift->userShift->employee->userEvaluation->id,
                     'workQuality' => $shift->userShift->employee->userEvaluation->work_quality,
