@@ -14,6 +14,7 @@ use Auth;
 use Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Xguard\Coordinator\Models\Review;
 use Xguard\Coordinator\Repositories\OnSiteEmployeeRepository;
 
 class OnSiteEmployeeRepositoryTest extends TestCase
@@ -81,6 +82,10 @@ class OnSiteEmployeeRepositoryTest extends TestCase
                 Check::JOB_SITE_SHIFT_ID => $jobSiteShift->id,
                 Check::CREATED_AT => Carbon::now()->startOfDay()->addHours(self::EIGHT_HOURS),
                 Check::TYPE => Checks::CHECKIN()->getValue()
+            ]);
+
+            factory(Review::class)->create([
+                Review::USER_SHIFT_ID => $jobSiteShift->userShift->id,
             ]);
         }
         return $jobSite;
