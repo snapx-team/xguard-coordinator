@@ -4,7 +4,7 @@ Route::group(['namespace' => 'App\Http\Controllers',], function () {
     Route::group(['prefix' => 'api/coordinator', 'as' => 'coordinator'], function () {
         Route::post('login', 'Auth\LoginController@apiLogin');
         Route::post('forgot', 'Auth\ForgotPasswordController@apiSendResetLinkEmail');
-        Route::put('/evaluation/{user}', 'EvaluationController@putUserEvaluation')->where('user', '[0-9]+');
+        Route::put('/evaluation/{user}', 'EvaluationController@putUserEvaluation')->where('user', '[0-9]+')->middleware('bindings');
     });
 });
 
