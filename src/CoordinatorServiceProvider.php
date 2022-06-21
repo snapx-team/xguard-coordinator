@@ -4,7 +4,9 @@ namespace Xguard\Coordinator;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Xguard\Coordinator\AWSStorage\S3Storage;
 use Xguard\Coordinator\Commands\CreateAdmin;
 use Xguard\Coordinator\Http\Middleware\CheckHasAccess;
 
@@ -49,6 +51,10 @@ class CoordinatorServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
             //$schedule->command(DeleteExcessDataPoints::class)->daily(); // TODO: After creating logic to cluster points and save pertinent data, delete all geolocation pings
+        });
+
+        $this->app->singleton(S3Storage::class, function () {
+            return Storage::disk('coordinator-s3');
         });
     }
 }

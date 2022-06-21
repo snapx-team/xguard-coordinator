@@ -14,6 +14,7 @@ import axios from 'axios';
 import device from 'vue-device-detector';
 import VueCrontab from 'vue-crontab';
 import * as VueGoogleMaps from 'vue2-google-maps';
+import VueImg from 'v-img';
 
 Vue.config.productionTip = false;
 
@@ -22,6 +23,7 @@ Vue.use(Toast, {
     maxToasts: 20,
     newestOnTop: true
 });
+Vue.use(VueImg);
 Vue.use(VueSweetalert2);
 Vue.use(DatePicker);
 Vue.use(VueMoment, {moment,});
