@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Supervisor extends User
 {
+    const SUPERVISOR_SHIFTS = 'supervisorShifts';
+    
     protected $table = 'users';
-
     protected $appends = [
         self::FULL_NAME,
     ];

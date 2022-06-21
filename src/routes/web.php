@@ -24,6 +24,7 @@ Route::group(['prefix' => 'coordinator', 'as' => 'coordinator'], function () {
 
                 // Supervisors
                 Route::get('/get-supervisors-data', 'SupervisorController@getSupervisorsData');
+                Route::get('/get-user-shift-odometer-images/{userId}/{shift}', 'SupervisorController@getUserShiftOdometerImages');
 
                 // Coordinators
                 Route::post('/create-coordinators', 'CoordinatorController@createCoordinators');

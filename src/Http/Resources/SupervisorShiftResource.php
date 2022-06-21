@@ -14,7 +14,8 @@ class SupervisorShiftResource extends JsonResource
             'startTime'=> $this->start_time,
             'endTime'=> $this->end_time,
             'isActive' => $this->isActive,
-            'jobSiteVisits' => JobSiteVisitResource::collection($this->whenLoaded('jobSiteVisits'))
+            'jobSiteVisits' => JobSiteVisitResource::collection($this->whenLoaded('jobSiteVisits')),
+            'odometer' => new OdometerResource($this->whenLoaded('odometer'))
         ];
     }
 }

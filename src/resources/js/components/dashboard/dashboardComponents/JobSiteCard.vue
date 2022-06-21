@@ -1,5 +1,5 @@
 <template>
-    <li class="px-3 py-2 flex justify-between items-center bg-white cursor-pointer border-b border-l border-gray">
+    <li class="px-3 py-2 m-1 flex justify-between items-center bg-white cursor-pointer border-b border-l border-gray">
         <div class="flex items-center">
 
             <div class="w-8 h-8 rounded-full flex flex-none bg-red-500">

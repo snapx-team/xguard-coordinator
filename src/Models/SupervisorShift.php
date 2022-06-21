@@ -26,6 +26,7 @@ class SupervisorShift extends Model
     const END_LNG = 'end_lng';
     const DELETED = 'DELETED';
     const USER = 'USER';
+    const ODOMETER = 'odometer';
 
     protected $dates = ['deleted_at', 'start_time', 'end_time'];
     protected $table = 'sa_supervisor_shifts';

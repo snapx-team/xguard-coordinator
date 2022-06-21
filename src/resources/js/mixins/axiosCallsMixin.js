@@ -65,6 +65,12 @@ export const axiosCalls = {
             });
         },
 
+        asyncGetUserShiftOdometerImages(userId, shiftId) {
+            return axios.get('get-user-shift-odometer-images/' + userId + '/' + shiftId).catch((error) => {
+                this.loopAllErrorsAsTriggerErrorToast(error);
+            });
+        },
+
         //Triggers
         triggerSuccessToast(message) {
             this.$toast.success(message, {
