@@ -10,7 +10,7 @@ class ReviewPostRequest extends BaseFormRequest
     {
         return [
             Review::USER_SHIFT_ID => 'required|exists:App\Models\UserShift,id',
-            Review::NOTE => 'required|string',
+            Review::NOTE => 'nullable|string',
             Review::RATING => 'required|numeric',
         ];
     }

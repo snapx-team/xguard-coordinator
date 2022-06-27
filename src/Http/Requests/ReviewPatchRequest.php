@@ -10,7 +10,7 @@ class ReviewPatchRequest extends BaseFormRequest
     {
         return [
             Review::ID => 'required|exists:Xguard\Coordinator\Models\Review,id',
-            Review::NOTE => 'required|string',
+            Review::NOTE => 'nullable|string',
             Review::RATING => 'required|numeric',
         ];
     }
