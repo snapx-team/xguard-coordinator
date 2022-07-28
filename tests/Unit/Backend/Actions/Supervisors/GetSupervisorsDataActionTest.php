@@ -6,6 +6,7 @@ use App\Enums\Roles;
 use App\Models\Contract;
 use App\Models\JobSite;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -32,12 +33,13 @@ class GetSupervisorsDataActionTest extends TestCase
     public function testRetrieveOnlySupervisors()
     {
         $newUser = factory(User::class)->create();
+        $dateRage = ['start' => Carbon::now()->format('Y-m-d'), 'end' => Carbon::yesterday()->format('Y-m-d')];
 
-        $supervisorsData = app(GetSupervisorsDataAction::class)->run();
+        $supervisorsData = app(GetSupervisorsDataAction::class)->fill(['dateRange' => $dateRage])->run();
         $this->assertFalse($supervisorsData['supervisorsData']->contains('id', $newUser->id));
 
         $newUser->assignRole(Roles::SUPERVISOR()->getValue());
-        $supervisorsData = app(GetSupervisorsDataAction::class)->run();
+        $supervisorsData = app(GetSupervisorsDataAction::class)->fill(['dateRange' => $dateRage])->run();
         $this->assertTrue($supervisorsData['supervisorsData']->contains('id', $newUser->id));
     }
 
@@ -55,7 +57,9 @@ class GetSupervisorsDataActionTest extends TestCase
             'supervisor_shift_id' => $supervisorShift->id, 'job_site_id' => $jobSite->id
         ]);
 
-        $this->getJson('/coordinator/get-supervisors-data')
+        $uri = route('coordinator.get-supervisor-data', ['start' => Carbon::now()->format('Y-m-d'), 'end' => Carbon::yesterday()->format('Y-m-d')]);
+
+        $this->getJson($uri)
             ->assertStatus(200)
             ->assertJsonStructure([
                 'supervisorsData' => [

@@ -12,8 +12,12 @@ export const axiosCalls = {
             });
         },
 
-        asyncGetSupervisorsData() {
-            return axios.get('get-supervisors-data').catch((error) => {
+        asyncGetSupervisorsData(dateRange) {
+            return axios.get('get-supervisors-data', {
+                params: {
+                    start: dateRange[0],
+                    end: dateRange[1]
+                }}).catch((error) => {
                 this.loopAllErrorsAsTriggerErrorToast(error);
             });
         },
@@ -67,6 +71,14 @@ export const axiosCalls = {
 
         asyncGetUserShiftOdometerImages(userId, shiftId) {
             return axios.get('get-user-shift-odometer-images/' + userId + '/' + shiftId).catch((error) => {
+                this.loopAllErrorsAsTriggerErrorToast(error);
+            });
+        },
+
+        // Location
+
+        asyncGetLocationPathData(supervisorShiftId) {
+            return axios.get('get-location-pings/' + supervisorShiftId).catch((error) => {
                 this.loopAllErrorsAsTriggerErrorToast(error);
             });
         },

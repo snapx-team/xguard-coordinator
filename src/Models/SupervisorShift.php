@@ -52,9 +52,9 @@ class SupervisorShift extends Model
         return $this->hasOne(Odometer::class);
     }
 
-    public function stops(): HasMany
+    public function locationPings(): HasMany
     {
-        return $this->hasMany(Stop::class);
+        return $this->hasMany(LocationPing::class);
     }
 
     public function jobSiteVisits(): HasMany

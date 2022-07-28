@@ -1,7 +1,11 @@
 <template>
     <div class="flex flex-wrap flex-col">
         <div class="flex justify-between p-2 bg-indigo-800 border-b">
-            <h1 class="text-white">Data</h1>
+            <div class="leading-5">
+                <h1 class="text-white">{{ supervisor.fullName }}</h1>
+                <small class="text-gray-400 text-xs"> Shift ID: {{ supervisorShift.id }}</small>
+            </div>
+
             <div>
                 <button @click="togglePane"
                         class="focus:outline-none flex flex-col items-center text-gray-400 hover:text-gray-500 transition duration-150 ease-in-out pl-8"
@@ -56,9 +60,19 @@
                         </h1>
                     </div>
                     <div v-bind:class="{'hidden': openTab !== 2, 'block': openTab === 2}">
-                        <h1 class="text-lg tracking-wide text-indigo-900 font-bold text-center my-5">
-                            no stops found (feature coming soon)
+
+                        <stop-card
+                            v-for="(stopMarker, index) in mapPaneData.pathData.stopsMarkers"
+                            :key="index"
+                            :stopMarker="stopMarker"
+                            @click.native="openGmapWindow(stopMarker, index)"
+                        ></stop-card>
+
+                        <h1 v-if="mapPaneData.pathData.stopsMarkers.length === 0"
+                            class="text-lg tracking-wide text-indigo-900 font-bold text-center my-5">
+                            no stops found
                         </h1>
+
                     </div>
                     <div v-bind:class="{'hidden': openTab !== 3, 'block': openTab === 3}">
 
@@ -76,7 +90,7 @@
                                         <p class="text-gray-900 whitespace-no-wrap">{{ supervisorShift.startTime | moment("HH:mm") }}h</p>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr v-if="supervisorShift.endTime">
                                     <td class="px-5 py-5 bg-white text-sm">
                                         <p class="text-gray-900 whitespace-no-wrap font-bold">Checkout</p>
                                     </td>
@@ -84,7 +98,7 @@
                                         <p class="text-gray-900 whitespace-no-wrap">{{ supervisorShift.endTime | moment("HH:mm") }}h</p>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr v-if="supervisorShift.endTime">
                                     <td class="px-5 py-5 bg-white text-sm">
                                         <p class="text-gray-900 whitespace-no-wrap font-bold">Total</p>
                                     </td>
@@ -110,7 +124,7 @@
                                         <p class="text-gray-900 whitespace-no-wrap">{{ supervisorShift.odometer.startOdometer }}km</p>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr v-if=" supervisorShift.odometer.endOdometer">
                                     <td class="px-5 py-5 bg-white text-sm">
                                         <p class="text-gray-900 whitespace-no-wrap font-bold">End</p>
                                     </td>
@@ -118,7 +132,7 @@
                                         <p class="text-gray-900 whitespace-no-wrap">{{ supervisorShift.odometer.endOdometer }}km</p>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr v-if=" supervisorShift.odometer.endOdometer">
                                     <td class="px-5 py-5 bg-white text-sm">
                                         <p class="text-gray-900 whitespace-no-wrap font-bold">Total</p>
                                     </td>
@@ -133,7 +147,8 @@
                         <loading-animation v-if="isLoadingImages" :size="50" class="m-auto mt-7"></loading-animation>
 
                         <div v-else class="bg-gray-200 shadow-md rounded-lg m-2">
-                            <h3 class="font-semibold text-gray-800 tracking-wide text-center p-3">Odometer Images</h3>
+                            <h3 v-if="images.length>0" class="font-semibold text-gray-800 tracking-wide text-center p-3">Odometer Images</h3>
+                            <h3 v-else class="font-semibold text-gray-800 tracking-wide text-center p-3">No Images</h3>
 
                             <div class="flex items-center flex-wrap justify-center">
                                 <div v-for="image in images" class="flex flex-1 p-2 m-2 bg-gray-800 rounded ">
@@ -153,20 +168,19 @@
 import JobSiteCard from "./JobSiteCard"
 import {axiosCalls} from "../../../mixins/axiosCallsMixin";
 import LoadingAnimation from "../../global/LoadingAnimation";
-import moment from "moment";
-
+import StopCard from "./StopCard";
 
 export default {
     inject: ["eventHub"],
 
-    components: {JobSiteCard, LoadingAnimation},
+    components: {StopCard, JobSiteCard, LoadingAnimation},
     props: {
         mapPaneData: {},
         supervisor: {},
         supervisorShift: {},
     },
     watch: {
-        supervisorShift: function () { // watch it
+        supervisorShift: function () {
             this.getOdometerImages()
         }
     },
@@ -191,9 +205,12 @@ export default {
                 this.isLoadingImages = false;
             });
         },
-        openGmapWindow(jobSiteMarker, index) {
-            const data = {jobSiteMarker: jobSiteMarker, index: index};
+        openGmapWindow(marker, index) {
+            const data = {marker: marker, index: index};
             this.eventHub.$emit("open-gmap-window", data);
+        },
+        loadPathData() {
+            this.eventHub.$emit("load-path-data");
         },
         togglePane() {
             this.eventHub.$emit("toggle-data-pane");

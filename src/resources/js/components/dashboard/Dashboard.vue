@@ -9,15 +9,23 @@
         <div class="mx-10 my-3 space-y-5 shadow-xl p-5 bg-white">
 
             <!-- date filter -->
-            <div class="flex flex-wrap bg-gray-50 p-4 rounded">
+            <div class="flex flex-wrap bg-gray-50 p-4 rounded items-end">
                 <div class="flex-column w-80 mr-2 ">
                     <p class="block text-xs font-bold leading-4 tracking-wide uppercase text-gray-600 pb-1">Select
                         Date</p>
-                    <date-picker type="date" v-model="selectedDate"
+                    <date-picker type="date" v-model="selectedDateRange"
                                  placeholder="YYYY-MM-DD"
+                                 :default-value="new Date()"
                                  format="YYYY-MM-DD"
+                                 :shortcuts="shortcuts"
+                                 @change="updateDateRange"
+                                 range
                     ></date-picker>
                 </div>
+                <h1 class="text-gray-700 font-semibold text-xl pl-2 ml-2 border-l mb-1">
+                    Between <span class="text-purple-900 font-bold">{{selectedDateRange[0] | moment("MMM DD, YYYY") }}</span>
+                    and <span class="text-purple-900 font-bold">{{selectedDateRange[1] | moment("MMM DD, YYYY") }}</span>
+                </h1>
             </div>
 
             <hr class="mb-5"/>
@@ -32,7 +40,7 @@
                         <i class="fa fa-th-large ml-2"></i>
                     </button>
                 </div>
-                <div class="h-full">
+                <div class="h-full" :key="componentKey">
                     <splitpanes class="default-theme">
                         <pane :size="20" min-size="15" :max-size="35" v-if="supervisorPaneIsVisible"
                               class="bg-indigo-50">
@@ -52,14 +60,26 @@
                                         @click="openWindow(m, index)"
                                     />
 
+                                    <gmap-marker
+                                        :key="index"
+                                        v-for="(m, index) in mapPaneData.pathData.stopsMarkers"
+                                        :position="m.position"
+                                        :icon="m.icon"
+                                        :clickable="true"
+                                        @click="openWindow(m, index)"
+                                    />
+
                                     <gmap-info-window
                                         @closeclick="mapPaneData.window_open=false"
                                         :opened="mapPaneData.window_open"
                                         :position="mapPaneData.infoPosition"
                                         :options="mapPaneData.infoOptions"
                                     >
-
                                     </gmap-info-window>
+
+                                    <gmap-polyline v-bind:path.sync="mapPaneData.pathData.path"
+                                                   v-bind:options="{ strokeColor:'#43f5ff'}"></gmap-polyline>
+
                                 </gmap-map>
                             </div>
                         </pane>
@@ -84,6 +104,7 @@ import "splitpanes/dist/splitpanes.css";
 import {gmapApi} from "vue2-google-maps";
 import DataPane from "./dashboardComponents/DataPane";
 import SupervisorPane from "./dashboardComponents/SupervisorPane";
+import moment from "moment";
 
 export default {
 
@@ -103,8 +124,9 @@ export default {
 
     data() {
         return {
+            componentKey: 0,
             supervisorsData: null,
-            selectedDate: new Date(),
+            selectedDateRange: [moment().startOf('week').toDate(), new Date()],
             selectedSupervisorShift: {},
             selectedSupervisor: {},
             mapPaneData: {
@@ -128,9 +150,38 @@ export default {
                 },
                 window_open: false,
                 currentMarkerIndex: null,
+                pathData: {
+                    isLoadingPath: false,
+                    stops: [],
+                    stopsMarkers: [],
+                    path: [],
+                },
             },
             dataPaneIsVisible: false,
             supervisorPaneIsVisible: true,
+            shortcuts: [
+                {text: 'Today', onClick: () => [new Date(), new Date()]},
+                {
+                    text: 'Yesterday',
+                    onClick: () => [moment().subtract(1, 'day').toDate(), new Date()]
+                },
+                {
+                    text: 'Start of Week',
+                    onClick: () => [moment().startOf('week').toDate(), new Date()]
+                },
+                {
+                    text: 'Start of Month',
+                    onClick: () => [moment().startOf('month').toDate(), new Date()]
+                },
+                {
+                    text: 'Last Week',
+                    onClick: () => [moment().subtract(1, 'week').toDate(), new Date()]
+                },
+                {
+                    text: 'Last Month',
+                    onClick: () => [moment().subtract(1, 'month').toDate(), new Date()]
+                }
+            ],
         };
     },
 
@@ -140,7 +191,7 @@ export default {
 
     created() {
         this.eventHub.$on("open-gmap-window", (data) => {
-            this.openWindow(data.jobSiteMarker, data.index);
+            this.openWindow(data.marker, data.index);
         });
         this.eventHub.$on("show-data-pane-info", (supervisorShiftData) => {
             this.showDataPaneInfo(supervisorShiftData);
@@ -151,6 +202,9 @@ export default {
         this.eventHub.$on("toggle-data-pane", () => {
             this.toggleDataPane();
         });
+        this.eventHub.$on("load-path-data", () => {
+            this.loadLocationPathData();
+        });
     },
 
     beforeDestroy() {
@@ -158,9 +212,23 @@ export default {
         this.eventHub.$off('show-data-pane-info');
         this.eventHub.$off('toggle-supervisor-pane');
         this.eventHub.$off('toggle-data-pane');
+        this.eventHub.$off('load-path-data');
     },
 
     methods: {
+
+        updateDateRange(){
+            this.getSupervisorsData();
+            this.componentKey++
+        },
+
+        loadLocationPathData() {
+            this.asyncGetLocationPathData(this.selectedSupervisorShift.id).then((data) => {
+                this.mapPaneData.pathData.path = data.data.path;
+                this.mapPaneData.pathData.stops = data.data.stops;
+                this.setStopsMarkers();
+            });
+        },
 
         toggleSupervisorPane() {
             this.supervisorPaneIsVisible = !this.supervisorPaneIsVisible
@@ -172,7 +240,7 @@ export default {
 
         getSupervisorsData() {
             this.eventHub.$emit("set-loading-state", true);
-            this.asyncGetSupervisorsData().then((data) => {
+            this.asyncGetSupervisorsData(this.selectedDateRange).then((data) => {
                 this.supervisorsData = data.data.supervisorsData;
                 this.eventHub.$emit("set-loading-state", false);
             });
@@ -183,6 +251,7 @@ export default {
             this.selectedSupervisorShift = supervisorShiftData.supervisorShift;
             this.selectedSupervisor = supervisorShiftData.supervisor;
             this.setJobSiteMarkers();
+            this.loadLocationPathData();
             this.mapPaneData.googleMapRefreshKey++;
         },
 
@@ -196,7 +265,25 @@ export default {
                 },
                 position: {lat: parseFloat(e.address.lat), lng: parseFloat(e.address.lng)},
                 name: e.jobSite.contracts[0].name,
-                address: e.address.name
+                address: e.address.name,
+                type: 'jobSiteVisit'
+            }));
+        },
+
+        setStopsMarkers() {
+            this.mapPaneData.pathData.stopsMarkers = this.mapPaneData.pathData.stops.map((e, index) => ({
+                label: {
+                    text: (index + 1).toString(),
+                },
+                icon: {
+                    url: 'https://www.google.com/mapfiles/dd-end.png'
+                },
+                position: {lat: parseFloat(e.averageLat), lng: parseFloat(e.averageLng)},
+                totalTime: e.totalTime,
+                startTime: e.startTime,
+                endTime: e.endTime,
+                coordinates: e.averageLat + ', ' + e.averageLng,
+                type: 'stop'
             }));
         },
 
@@ -206,19 +293,37 @@ export default {
                 lng: marker.position.lng
             };
         },
-        openWindow(marker, index) {
 
+        openWindow(marker, index) {
             this.dataPaneIsVisible = true;
             this.mapPaneData.infoPosition = this.getPosition(marker);
-            this.mapPaneData.infoOptions.content =
-                '<div class="">' +
-                '<p class="font-semibold">' +
-                marker.name +
-                '</p>' +
-                '<p class="">' +
-                marker.address +
-                '</p>' +
-                '</div>';
+            if (marker.type === 'jobSiteVisit') {
+                this.mapPaneData.infoOptions.content =
+                    '<div class="">' +
+                    '<p class="font-semibold pb-2">' +
+                    marker.name +
+                    '</p>' +
+                    '<p class="">' +
+                    marker.address +
+                    '</p>' +
+                    '</div>';
+            } else if (marker.type === 'stop') {
+                this.mapPaneData.infoOptions.content =
+                    '<div class="">' +
+                    '<p class="font-semibold pb-2">' +
+                    'Stopped roughly ' + marker.totalTime + ' minutes' +
+                    '</p>' +
+                    '<p class="font-semibold pb-2">' +
+                    'Between: ' + moment.utc(marker.startTime).format('HH:mm') + 'h - ' + moment.utc(marker.endTime).format('HH:mm') + 'h ' +
+                    '</p>' +
+                    '<p class="pb-2">' +
+                    'Coordinates:' +
+                    '</p>' +
+                    '<p class="">' +
+                    marker.coordinates +
+                    '</p>' +
+                    '</div>';
+            }
 
             if (this.mapPaneData.currentMarkerIndex === index) {
                 this.mapPaneData.window_open = !this.mapPaneData.window_open;
