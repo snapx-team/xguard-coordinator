@@ -11,7 +11,10 @@
                 <small class="text-gray-400 text-xs">{{ supervisor.email }}</small>
             </div>
         </div>
-        <i class="fa fa-caret-right ml-2"></i>
+        <div class="flex items-center font-semibold">
+            <h2>({{ supervisor.supervisorShifts.length }})</h2>
+            <i class="fa fa-caret-right ml-2"></i>
+        </div>
     </li>
 </template>
 <script>

@@ -16,6 +16,7 @@ class GetSupervisorsDataAction extends Action
     {
         $supervisors = Supervisor::with([
             Supervisor::SUPERVISOR_SHIFTS => function ($q) {
+                $q->whereBetween(SupervisorShift::CREATED_AT, [$this->dateRange['start'], $this->dateRange['end']]);
                 $q->whereHas(SupervisorShift::ODOMETER);
                 $q->with([self::JOB_SITE_VISITS_JOB_SITE_CONTRACTS, SupervisorShift::ODOMETER]);
             }

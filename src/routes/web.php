@@ -23,7 +23,7 @@ Route::group(['prefix' => 'coordinator', 'as' => 'coordinator'], function () {
                 Route::get('/get-footer-info', 'AppController@getFooterInfo');
 
                 // Supervisors
-                Route::get('/get-supervisors-data', 'SupervisorController@getSupervisorsData');
+                Route::get('/get-supervisors-data', 'SupervisorController@getSupervisorsData')->name('.get-supervisor-data');
                 Route::get('/get-user-shift-odometer-images/{userId}/{shift}', 'SupervisorController@getUserShiftOdometerImages');
 
                 // Coordinators
@@ -36,6 +36,13 @@ Route::group(['prefix' => 'coordinator', 'as' => 'coordinator'], function () {
                 Route::get('/get-some-users/{searchTerm}', 'ErpController@getSomeUsers');
                 Route::get('/get-all-active-contracts', 'ErpController@getAllActiveContracts');
                 Route::get('/get-some-active-contracts/{searchTerm}', 'ErpController@getSomeActiveContracts');
+
+                //Location
+
+                Route::get(
+                    '/get-location-pings/{supervisorShiftId}',
+                    'LocationPingController@getSupervisorShiftLocationPings'
+                )->name('.get-supervisor-shift-location-ping');
             });
         });
     });

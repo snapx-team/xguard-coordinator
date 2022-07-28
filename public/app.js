@@ -7357,6 +7357,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue2_google_maps__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(vue2_google_maps__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _dashboardComponents_DataPane__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./dashboardComponents/DataPane */ "./src/resources/js/components/dashboard/dashboardComponents/DataPane.vue");
 /* harmony import */ var _dashboardComponents_SupervisorPane__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./dashboardComponents/SupervisorPane */ "./src/resources/js/components/dashboard/dashboardComponents/SupervisorPane.vue");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_6__);
 //
 //
 //
@@ -7435,6 +7437,27 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 
@@ -7455,8 +7478,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      componentKey: 0,
       supervisorsData: null,
-      selectedDate: new Date(),
+      selectedDateRange: [moment__WEBPACK_IMPORTED_MODULE_6___default()().startOf('week').toDate(), new Date()],
       selectedSupervisorShift: {},
       selectedSupervisor: {},
       mapPaneData: {
@@ -7479,10 +7503,47 @@ __webpack_require__.r(__webpack_exports__);
           content: null
         },
         window_open: false,
-        currentMarkerIndex: null
+        currentMarkerIndex: null,
+        pathData: {
+          isLoadingPath: false,
+          stops: [],
+          stopsMarkers: [],
+          path: []
+        }
       },
       dataPaneIsVisible: false,
-      supervisorPaneIsVisible: true
+      supervisorPaneIsVisible: true,
+      shortcuts: [{
+        text: 'Today',
+        onClick: function onClick() {
+          return [new Date(), new Date()];
+        }
+      }, {
+        text: 'Yesterday',
+        onClick: function onClick() {
+          return [moment__WEBPACK_IMPORTED_MODULE_6___default()().subtract(1, 'day').toDate(), new Date()];
+        }
+      }, {
+        text: 'Start of Week',
+        onClick: function onClick() {
+          return [moment__WEBPACK_IMPORTED_MODULE_6___default()().startOf('week').toDate(), new Date()];
+        }
+      }, {
+        text: 'Start of Month',
+        onClick: function onClick() {
+          return [moment__WEBPACK_IMPORTED_MODULE_6___default()().startOf('month').toDate(), new Date()];
+        }
+      }, {
+        text: 'Last Week',
+        onClick: function onClick() {
+          return [moment__WEBPACK_IMPORTED_MODULE_6___default()().subtract(1, 'week').toDate(), new Date()];
+        }
+      }, {
+        text: 'Last Month',
+        onClick: function onClick() {
+          return [moment__WEBPACK_IMPORTED_MODULE_6___default()().subtract(1, 'month').toDate(), new Date()];
+        }
+      }]
     };
   },
   computed: {
@@ -7492,7 +7553,7 @@ __webpack_require__.r(__webpack_exports__);
     var _this = this;
 
     this.eventHub.$on("open-gmap-window", function (data) {
-      _this.openWindow(data.jobSiteMarker, data.index);
+      _this.openWindow(data.marker, data.index);
     });
     this.eventHub.$on("show-data-pane-info", function (supervisorShiftData) {
       _this.showDataPaneInfo(supervisorShiftData);
@@ -7503,14 +7564,32 @@ __webpack_require__.r(__webpack_exports__);
     this.eventHub.$on("toggle-data-pane", function () {
       _this.toggleDataPane();
     });
+    this.eventHub.$on("load-path-data", function () {
+      _this.loadLocationPathData();
+    });
   },
   beforeDestroy: function beforeDestroy() {
     this.eventHub.$off('open-gmap-window');
     this.eventHub.$off('show-data-pane-info');
     this.eventHub.$off('toggle-supervisor-pane');
     this.eventHub.$off('toggle-data-pane');
+    this.eventHub.$off('load-path-data');
   },
   methods: {
+    updateDateRange: function updateDateRange() {
+      this.getSupervisorsData();
+      this.componentKey++;
+    },
+    loadLocationPathData: function loadLocationPathData() {
+      var _this2 = this;
+
+      this.asyncGetLocationPathData(this.selectedSupervisorShift.id).then(function (data) {
+        _this2.mapPaneData.pathData.path = data.data.path;
+        _this2.mapPaneData.pathData.stops = data.data.stops;
+
+        _this2.setStopsMarkers();
+      });
+    },
     toggleSupervisorPane: function toggleSupervisorPane() {
       this.supervisorPaneIsVisible = !this.supervisorPaneIsVisible;
     },
@@ -7518,13 +7597,13 @@ __webpack_require__.r(__webpack_exports__);
       this.dataPaneIsVisible = !this.dataPaneIsVisible;
     },
     getSupervisorsData: function getSupervisorsData() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.eventHub.$emit("set-loading-state", true);
-      this.asyncGetSupervisorsData().then(function (data) {
-        _this2.supervisorsData = data.data.supervisorsData;
+      this.asyncGetSupervisorsData(this.selectedDateRange).then(function (data) {
+        _this3.supervisorsData = data.data.supervisorsData;
 
-        _this2.eventHub.$emit("set-loading-state", false);
+        _this3.eventHub.$emit("set-loading-state", false);
       });
     },
     showDataPaneInfo: function showDataPaneInfo(supervisorShiftData) {
@@ -7532,6 +7611,7 @@ __webpack_require__.r(__webpack_exports__);
       this.selectedSupervisorShift = supervisorShiftData.supervisorShift;
       this.selectedSupervisor = supervisorShiftData.supervisor;
       this.setJobSiteMarkers();
+      this.loadLocationPathData();
       this.mapPaneData.googleMapRefreshKey++;
     },
     setJobSiteMarkers: function setJobSiteMarkers() {
@@ -7548,7 +7628,29 @@ __webpack_require__.r(__webpack_exports__);
             lng: parseFloat(e.address.lng)
           },
           name: e.jobSite.contracts[0].name,
-          address: e.address.name
+          address: e.address.name,
+          type: 'jobSiteVisit'
+        };
+      });
+    },
+    setStopsMarkers: function setStopsMarkers() {
+      this.mapPaneData.pathData.stopsMarkers = this.mapPaneData.pathData.stops.map(function (e, index) {
+        return {
+          label: {
+            text: (index + 1).toString()
+          },
+          icon: {
+            url: 'https://www.google.com/mapfiles/dd-end.png'
+          },
+          position: {
+            lat: parseFloat(e.averageLat),
+            lng: parseFloat(e.averageLng)
+          },
+          totalTime: e.totalTime,
+          startTime: e.startTime,
+          endTime: e.endTime,
+          coordinates: e.averageLat + ', ' + e.averageLng,
+          type: 'stop'
         };
       });
     },
@@ -7561,7 +7663,12 @@ __webpack_require__.r(__webpack_exports__);
     openWindow: function openWindow(marker, index) {
       this.dataPaneIsVisible = true;
       this.mapPaneData.infoPosition = this.getPosition(marker);
-      this.mapPaneData.infoOptions.content = '<div class="">' + '<p class="font-semibold">' + marker.name + '</p>' + '<p class="">' + marker.address + '</p>' + '</div>';
+
+      if (marker.type === 'jobSiteVisit') {
+        this.mapPaneData.infoOptions.content = '<div class="">' + '<p class="font-semibold pb-2">' + marker.name + '</p>' + '<p class="">' + marker.address + '</p>' + '</div>';
+      } else if (marker.type === 'stop') {
+        this.mapPaneData.infoOptions.content = '<div class="">' + '<p class="font-semibold pb-2">' + 'Stopped roughly ' + marker.totalTime + ' minutes' + '</p>' + '<p class="font-semibold pb-2">' + 'Between: ' + moment__WEBPACK_IMPORTED_MODULE_6___default.a.utc(marker.startTime).format('HH:mm') + 'h - ' + moment__WEBPACK_IMPORTED_MODULE_6___default.a.utc(marker.endTime).format('HH:mm') + 'h ' + '</p>' + '<p class="pb-2">' + 'Coordinates:' + '</p>' + '<p class="">' + marker.coordinates + '</p>' + '</div>';
+      }
 
       if (this.mapPaneData.currentMarkerIndex === index) {
         this.mapPaneData.window_open = !this.mapPaneData.window_open;
@@ -7587,8 +7694,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _JobSiteCard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./JobSiteCard */ "./src/resources/js/components/dashboard/dashboardComponents/JobSiteCard.vue");
 /* harmony import */ var _mixins_axiosCallsMixin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../mixins/axiosCallsMixin */ "./src/resources/js/mixins/axiosCallsMixin.js");
 /* harmony import */ var _global_LoadingAnimation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../global/LoadingAnimation */ "./src/resources/js/components/global/LoadingAnimation.vue");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _StopCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./StopCard */ "./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -7746,6 +7867,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   inject: ["eventHub"],
   components: {
+    StopCard: _StopCard__WEBPACK_IMPORTED_MODULE_3__["default"],
     JobSiteCard: _JobSiteCard__WEBPACK_IMPORTED_MODULE_0__["default"],
     LoadingAnimation: _global_LoadingAnimation__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
@@ -7756,7 +7878,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   watch: {
     supervisorShift: function supervisorShift() {
-      // watch it
       this.getOdometerImages();
     }
   },
@@ -7781,12 +7902,15 @@ __webpack_require__.r(__webpack_exports__);
         _this.isLoadingImages = false;
       });
     },
-    openGmapWindow: function openGmapWindow(jobSiteMarker, index) {
+    openGmapWindow: function openGmapWindow(marker, index) {
       var data = {
-        jobSiteMarker: jobSiteMarker,
+        marker: marker,
         index: index
       };
       this.eventHub.$emit("open-gmap-window", data);
+    },
+    loadPathData: function loadPathData() {
+      this.eventHub.$emit("load-path-data");
     },
     togglePane: function togglePane() {
       this.eventHub.$emit("toggle-data-pane");
@@ -7877,6 +8001,50 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     dateRangeText: function dateRangeText() {
       return this.shift.endTime ? moment__WEBPACK_IMPORTED_MODULE_0___default.a.utc(this.shift.startTime).format('MMM DD, HH:mm') + " - " + moment__WEBPACK_IMPORTED_MODULE_0___default.a.utc(this.shift.endTime).format('MMM DD, HH:mm') : moment__WEBPACK_IMPORTED_MODULE_0___default.a.utc(this.shift.startTime).format('MMM DD, HH:mm') + " - in progress";
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=script&lang=js&":
+/*!*****************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=script&lang=js& ***!
+  \*****************************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global_Avatar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global/Avatar */ "./src/resources/js/components/global/Avatar.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  components: {
+    Avatar: _global_Avatar__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  props: {
+    stopMarker: {
+      type: Object,
+      "default": function _default() {
+        return {};
+      }
     }
   }
 });
@@ -8020,6 +8188,9 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global_Avatar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global/Avatar */ "./src/resources/js/components/global/Avatar.vue");
+//
+//
+//
 //
 //
 //
@@ -8596,7 +8767,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../../node_module
 
 
 // module
-exports.push([module.i, "\n.list-inline-item[data-v-5eaa54e6] {\n    cursor: pointer;\n}\n.next-leave[data-v-5eaa54e6], .previous-leave[data-v-5eaa54e6] {\n    opacity: 1;\n}\n.next-leave-active[data-v-5eaa54e6], .previous-leave-active[data-v-5eaa54e6] {\n    transition: all .2s ease\n}\n.next-leave-to[data-v-5eaa54e6] {\n    opacity: 0;\n    transform: translateX(-50px);\n}\n.next-enter[data-v-5eaa54e6] {\n    opacity: 0;\n    transform: translateX(50px);\n}\n.next-enter-active[data-v-5eaa54e6], .previous-enter-active[data-v-5eaa54e6] {\n    transition: all .2s ease\n}\n.next-enter-to[data-v-5eaa54e6], .previous-enter-to[data-v-5eaa54e6] {\n    opacity: 1;\n}\n.previous-leave-to[data-v-5eaa54e6] {\n    opacity: 0;\n    transform: translateX(50px);\n}\n.previous-enter[data-v-5eaa54e6] {\n    opacity: 0;\n    transform: translateX(-50px);\n}\n", ""]);
+exports.push([module.i, "\n.list-inline-item[data-v-5eaa54e6] {\r\n    cursor: pointer;\n}\n.next-leave[data-v-5eaa54e6], .previous-leave[data-v-5eaa54e6] {\r\n    opacity: 1;\n}\n.next-leave-active[data-v-5eaa54e6], .previous-leave-active[data-v-5eaa54e6] {\r\n    transition: all .2s ease\n}\n.next-leave-to[data-v-5eaa54e6] {\r\n    opacity: 0;\r\n    transform: translateX(-50px);\n}\n.next-enter[data-v-5eaa54e6] {\r\n    opacity: 0;\r\n    transform: translateX(50px);\n}\n.next-enter-active[data-v-5eaa54e6], .previous-enter-active[data-v-5eaa54e6] {\r\n    transition: all .2s ease\n}\n.next-enter-to[data-v-5eaa54e6], .previous-enter-to[data-v-5eaa54e6] {\r\n    opacity: 1;\n}\n.previous-leave-to[data-v-5eaa54e6] {\r\n    opacity: 0;\r\n    transform: translateX(50px);\n}\n.previous-enter[data-v-5eaa54e6] {\r\n    opacity: 0;\r\n    transform: translateX(-50px);\n}\r\n", ""]);
 
 // exports
 
@@ -37635,7 +37806,9 @@ var render = function () {
           [
             _c(
               "div",
-              { staticClass: "flex flex-wrap bg-gray-50 p-4 rounded" },
+              {
+                staticClass: "flex flex-wrap bg-gray-50 p-4 rounded items-end",
+              },
               [
                 _c(
                   "div",
@@ -37654,18 +37827,54 @@ var render = function () {
                       attrs: {
                         type: "date",
                         placeholder: "YYYY-MM-DD",
+                        "default-value": new Date(),
                         format: "YYYY-MM-DD",
+                        shortcuts: _vm.shortcuts,
+                        range: "",
                       },
+                      on: { change: _vm.updateDateRange },
                       model: {
-                        value: _vm.selectedDate,
+                        value: _vm.selectedDateRange,
                         callback: function ($$v) {
-                          _vm.selectedDate = $$v
+                          _vm.selectedDateRange = $$v
                         },
-                        expression: "selectedDate",
+                        expression: "selectedDateRange",
                       },
                     }),
                   ],
                   1
+                ),
+                _vm._v(" "),
+                _c(
+                  "h1",
+                  {
+                    staticClass:
+                      "text-gray-700 font-semibold text-xl pl-2 ml-2 border-l mb-1",
+                  },
+                  [
+                    _vm._v("\n                Between "),
+                    _c("span", { staticClass: "text-purple-900 font-bold" }, [
+                      _vm._v(
+                        _vm._s(
+                          _vm._f("moment")(
+                            _vm.selectedDateRange[0],
+                            "MMM DD, YYYY"
+                          )
+                        )
+                      ),
+                    ]),
+                    _vm._v("\n                and "),
+                    _c("span", { staticClass: "text-purple-900 font-bold" }, [
+                      _vm._v(
+                        _vm._s(
+                          _vm._f("moment")(
+                            _vm.selectedDateRange[1],
+                            "MMM DD, YYYY"
+                          )
+                        )
+                      ),
+                    ]),
+                  ]
                 ),
               ]
             ),
@@ -37694,7 +37903,7 @@ var render = function () {
               _vm._v(" "),
               _c(
                 "div",
-                { staticClass: "h-full" },
+                { key: _vm.componentKey, staticClass: "h-full" },
                 [
                   _c(
                     "splitpanes",
@@ -37761,6 +37970,25 @@ var render = function () {
                                     }
                                   ),
                                   _vm._v(" "),
+                                  _vm._l(
+                                    _vm.mapPaneData.pathData.stopsMarkers,
+                                    function (m, index) {
+                                      return _c("gmap-marker", {
+                                        key: index,
+                                        attrs: {
+                                          position: m.position,
+                                          icon: m.icon,
+                                          clickable: true,
+                                        },
+                                        on: {
+                                          click: function ($event) {
+                                            return _vm.openWindow(m, index)
+                                          },
+                                        },
+                                      })
+                                    }
+                                  ),
+                                  _vm._v(" "),
                                   _c("gmap-info-window", {
                                     attrs: {
                                       opened: _vm.mapPaneData.window_open,
@@ -37770,6 +37998,22 @@ var render = function () {
                                     on: {
                                       closeclick: function ($event) {
                                         _vm.mapPaneData.window_open = false
+                                      },
+                                    },
+                                  }),
+                                  _vm._v(" "),
+                                  _c("gmap-polyline", {
+                                    attrs: {
+                                      path: _vm.mapPaneData.pathData.path,
+                                      options: { strokeColor: "#43f5ff" },
+                                    },
+                                    on: {
+                                      "update:path": function ($event) {
+                                        return _vm.$set(
+                                          _vm.mapPaneData.pathData,
+                                          "path",
+                                          $event
+                                        )
                                       },
                                     },
                                   }),
@@ -37855,7 +38099,15 @@ var render = function () {
       "div",
       { staticClass: "flex justify-between p-2 bg-indigo-800 border-b" },
       [
-        _c("h1", { staticClass: "text-white" }, [_vm._v("Data")]),
+        _c("div", { staticClass: "leading-5" }, [
+          _c("h1", { staticClass: "text-white" }, [
+            _vm._v(_vm._s(_vm.supervisor.fullName)),
+          ]),
+          _vm._v(" "),
+          _c("small", { staticClass: "text-gray-400 text-xs" }, [
+            _vm._v(" Shift ID: " + _vm._s(_vm.supervisorShift.id)),
+          ]),
+        ]),
         _vm._v(" "),
         _c("div", [
           _c(
@@ -38019,19 +38271,37 @@ var render = function () {
                   },
                 },
                 [
-                  _c(
-                    "h1",
-                    {
-                      staticClass:
-                        "text-lg tracking-wide text-indigo-900 font-bold text-center my-5",
-                    },
-                    [
-                      _vm._v(
-                        "\n                        no stops found (feature coming soon)\n                    "
-                      ),
-                    ]
+                  _vm._l(
+                    _vm.mapPaneData.pathData.stopsMarkers,
+                    function (stopMarker, index) {
+                      return _c("stop-card", {
+                        key: index,
+                        attrs: { stopMarker: stopMarker },
+                        nativeOn: {
+                          click: function ($event) {
+                            return _vm.openGmapWindow(stopMarker, index)
+                          },
+                        },
+                      })
+                    }
                   ),
-                ]
+                  _vm._v(" "),
+                  _vm.mapPaneData.pathData.stopsMarkers.length === 0
+                    ? _c(
+                        "h1",
+                        {
+                          staticClass:
+                            "text-lg tracking-wide text-indigo-900 font-bold text-center my-5",
+                        },
+                        [
+                          _vm._v(
+                            "\n                        no stops found\n                    "
+                          ),
+                        ]
+                      )
+                    : _vm._e(),
+                ],
+                2
               ),
               _vm._v(" "),
               _c(
@@ -38093,63 +38363,71 @@ var render = function () {
                               ),
                             ]),
                             _vm._v(" "),
-                            _c("tr", [
-                              _vm._m(1),
-                              _vm._v(" "),
-                              _c(
-                                "td",
-                                { staticClass: "px-5 py-5 bg-white text-sm" },
-                                [
+                            _vm.supervisorShift.endTime
+                              ? _c("tr", [
+                                  _vm._m(1),
+                                  _vm._v(" "),
                                   _c(
-                                    "p",
+                                    "td",
                                     {
-                                      staticClass:
-                                        "text-gray-900 whitespace-no-wrap",
+                                      staticClass: "px-5 py-5 bg-white text-sm",
                                     },
                                     [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("moment")(
-                                            _vm.supervisorShift.endTime,
-                                            "HH:mm"
-                                          )
-                                        ) + "h"
+                                      _c(
+                                        "p",
+                                        {
+                                          staticClass:
+                                            "text-gray-900 whitespace-no-wrap",
+                                        },
+                                        [
+                                          _vm._v(
+                                            _vm._s(
+                                              _vm._f("moment")(
+                                                _vm.supervisorShift.endTime,
+                                                "HH:mm"
+                                              )
+                                            ) + "h"
+                                          ),
+                                        ]
                                       ),
                                     ]
                                   ),
-                                ]
-                              ),
-                            ]),
+                                ])
+                              : _vm._e(),
                             _vm._v(" "),
-                            _c("tr", [
-                              _vm._m(2),
-                              _vm._v(" "),
-                              _c(
-                                "td",
-                                { staticClass: "px-5 py-5 bg-white text-sm" },
-                                [
+                            _vm.supervisorShift.endTime
+                              ? _c("tr", [
+                                  _vm._m(2),
+                                  _vm._v(" "),
                                   _c(
-                                    "p",
+                                    "td",
                                     {
-                                      staticClass:
-                                        "text-gray-900 whitespace-no-wrap",
+                                      staticClass: "px-5 py-5 bg-white text-sm",
                                     },
                                     [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm._f("moment")(
-                                            _vm.supervisorShift.endTime,
-                                            "from",
-                                            _vm.supervisorShift.startTime,
-                                            true
-                                          )
-                                        )
+                                      _c(
+                                        "p",
+                                        {
+                                          staticClass:
+                                            "text-gray-900 whitespace-no-wrap",
+                                        },
+                                        [
+                                          _vm._v(
+                                            _vm._s(
+                                              _vm._f("moment")(
+                                                _vm.supervisorShift.endTime,
+                                                "from",
+                                                _vm.supervisorShift.startTime,
+                                                true
+                                              )
+                                            )
+                                          ),
+                                        ]
                                       ),
                                     ]
                                   ),
-                                ]
-                              ),
-                            ]),
+                                ])
+                              : _vm._e(),
                           ]),
                         ]
                       ),
@@ -38204,59 +38482,67 @@ var render = function () {
                               ),
                             ]),
                             _vm._v(" "),
-                            _c("tr", [
-                              _vm._m(4),
-                              _vm._v(" "),
-                              _c(
-                                "td",
-                                { staticClass: "px-5 py-5 bg-white text-sm" },
-                                [
+                            _vm.supervisorShift.odometer.endOdometer
+                              ? _c("tr", [
+                                  _vm._m(4),
+                                  _vm._v(" "),
                                   _c(
-                                    "p",
+                                    "td",
                                     {
-                                      staticClass:
-                                        "text-gray-900 whitespace-no-wrap",
+                                      staticClass: "px-5 py-5 bg-white text-sm",
                                     },
                                     [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.supervisorShift.odometer
-                                            .endOdometer
-                                        ) + "km"
+                                      _c(
+                                        "p",
+                                        {
+                                          staticClass:
+                                            "text-gray-900 whitespace-no-wrap",
+                                        },
+                                        [
+                                          _vm._v(
+                                            _vm._s(
+                                              _vm.supervisorShift.odometer
+                                                .endOdometer
+                                            ) + "km"
+                                          ),
+                                        ]
                                       ),
                                     ]
                                   ),
-                                ]
-                              ),
-                            ]),
+                                ])
+                              : _vm._e(),
                             _vm._v(" "),
-                            _c("tr", [
-                              _vm._m(5),
-                              _vm._v(" "),
-                              _c(
-                                "td",
-                                { staticClass: "px-5 py-5 bg-white text-sm" },
-                                [
+                            _vm.supervisorShift.odometer.endOdometer
+                              ? _c("tr", [
+                                  _vm._m(5),
+                                  _vm._v(" "),
                                   _c(
-                                    "p",
+                                    "td",
                                     {
-                                      staticClass:
-                                        "text-gray-900 whitespace-no-wrap",
+                                      staticClass: "px-5 py-5 bg-white text-sm",
                                     },
                                     [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.supervisorShift.odometer
-                                            .endOdometer -
-                                            _vm.supervisorShift.odometer
-                                              .startOdometer
-                                        ) + "km"
+                                      _c(
+                                        "p",
+                                        {
+                                          staticClass:
+                                            "text-gray-900 whitespace-no-wrap",
+                                        },
+                                        [
+                                          _vm._v(
+                                            _vm._s(
+                                              _vm.supervisorShift.odometer
+                                                .endOdometer -
+                                                _vm.supervisorShift.odometer
+                                                  .startOdometer
+                                            ) + "km"
+                                          ),
+                                        ]
                                       ),
                                     ]
                                   ),
-                                ]
-                              ),
-                            ]),
+                                ])
+                              : _vm._e(),
                           ]),
                         ]
                       ),
@@ -38272,14 +38558,23 @@ var render = function () {
                         "div",
                         { staticClass: "bg-gray-200 shadow-md rounded-lg m-2" },
                         [
-                          _c(
-                            "h3",
-                            {
-                              staticClass:
-                                "font-semibold text-gray-800 tracking-wide text-center p-3",
-                            },
-                            [_vm._v("Odometer Images")]
-                          ),
+                          _vm.images.length > 0
+                            ? _c(
+                                "h3",
+                                {
+                                  staticClass:
+                                    "font-semibold text-gray-800 tracking-wide text-center p-3",
+                                },
+                                [_vm._v("Odometer Images")]
+                              )
+                            : _c(
+                                "h3",
+                                {
+                                  staticClass:
+                                    "font-semibold text-gray-800 tracking-wide text-center p-3",
+                                },
+                                [_vm._v("No Images")]
+                              ),
                           _vm._v(" "),
                           _c(
                             "div",
@@ -38494,6 +38789,81 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=template&id=770431a8&":
+/*!*********************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=template&id=770431a8& ***!
+  \*********************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function () {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "li",
+    {
+      staticClass:
+        "px-3 py-2 m-1 flex justify-between items-center bg-white cursor-pointer border-b border-l border-gray",
+    },
+    [
+      _c("div", { staticClass: "flex items-center" }, [
+        _c(
+          "div",
+          { staticClass: "w-8 h-8 rounded-full flex flex-none bg-gray-700" },
+          [
+            _c("p", { staticClass: "text-white m-auto font-semibold" }, [
+              _vm._v(_vm._s(_vm.stopMarker.label.text)),
+            ]),
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "ml-3 leading-4 text-gray-700 tracking-wide" },
+          [
+            _c("p", { staticClass: "font-semibold text-sm" }, [
+              _vm._v(
+                "Stopped roughly " +
+                  _vm._s(_vm.stopMarker.totalTime) +
+                  " minutes"
+              ),
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-semibold text-sm pb-2" }, [
+              _vm._v(
+                "Between: " +
+                  _vm._s(_vm._f("moment")(_vm.stopMarker.startTime, "HH:mm")) +
+                  "h - " +
+                  _vm._s(_vm._f("moment")(_vm.stopMarker.endTime, "HH:mm")) +
+                  "h"
+              ),
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "text-gray-400 text-xs pb-2" }, [
+              _vm._v("coordinates:"),
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "text-gray-400 text-xs pb-2" }, [
+              _vm._v(_vm._s(_vm.stopMarker.coordinates) + " "),
+            ]),
+          ]
+        ),
+      ]),
+    ]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/resources/js/components/dashboard/dashboardComponents/SupervisorPane.vue?vue&type=template&id=5eaa54e6&scoped=true&":
 /*!***************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/resources/js/components/dashboard/dashboardComponents/SupervisorPane.vue?vue&type=template&id=5eaa54e6&scoped=true& ***!
@@ -38685,7 +39055,13 @@ var render = function () {
         ),
       ]),
       _vm._v(" "),
-      _c("i", { staticClass: "fa fa-caret-right ml-2" }),
+      _c("div", { staticClass: "flex items-center font-semibold" }, [
+        _c("h2", [
+          _vm._v("(" + _vm._s(_vm.supervisor.supervisorShifts.length) + ")"),
+        ]),
+        _vm._v(" "),
+        _c("i", { staticClass: "fa fa-caret-right ml-2" }),
+      ]),
     ]
   )
 }
@@ -68442,6 +68818,75 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue":
+/*!********************************************************************************!*\
+  !*** ./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _StopCard_vue_vue_type_template_id_770431a8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./StopCard.vue?vue&type=template&id=770431a8& */ "./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=template&id=770431a8&");
+/* harmony import */ var _StopCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./StopCard.vue?vue&type=script&lang=js& */ "./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _StopCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _StopCard_vue_vue_type_template_id_770431a8___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _StopCard_vue_vue_type_template_id_770431a8___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/resources/js/components/dashboard/dashboardComponents/StopCard.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************!*\
+  !*** ./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_StopCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../../node_modules/vue-loader/lib??vue-loader-options!./StopCard.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_StopCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=template&id=770431a8&":
+/*!***************************************************************************************************************!*\
+  !*** ./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=template&id=770431a8& ***!
+  \***************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_StopCard_vue_vue_type_template_id_770431a8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../../node_modules/vue-loader/lib??vue-loader-options!./StopCard.vue?vue&type=template&id=770431a8& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/resources/js/components/dashboard/dashboardComponents/StopCard.vue?vue&type=template&id=770431a8&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_StopCard_vue_vue_type_template_id_770431a8___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_StopCard_vue_vue_type_template_id_770431a8___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./src/resources/js/components/dashboard/dashboardComponents/SupervisorPane.vue":
 /*!**************************************************************************************!*\
   !*** ./src/resources/js/components/dashboard/dashboardComponents/SupervisorPane.vue ***!
@@ -69018,10 +69463,15 @@ var axiosCalls = {
         _this.loopAllErrorsAsTriggerErrorToast(error);
       });
     },
-    asyncGetSupervisorsData: function asyncGetSupervisorsData() {
+    asyncGetSupervisorsData: function asyncGetSupervisorsData(dateRange) {
       var _this2 = this;
 
-      return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('get-supervisors-data')["catch"](function (error) {
+      return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('get-supervisors-data', {
+        params: {
+          start: dateRange[0],
+          end: dateRange[1]
+        }
+      })["catch"](function (error) {
         _this2.loopAllErrorsAsTriggerErrorToast(error);
       });
     },
@@ -69085,6 +69535,14 @@ var axiosCalls = {
         _this9.loopAllErrorsAsTriggerErrorToast(error);
       });
     },
+    // Location
+    asyncGetLocationPathData: function asyncGetLocationPathData(supervisorShiftId) {
+      var _this10 = this;
+
+      return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('get-location-pings/' + supervisorShiftId)["catch"](function (error) {
+        _this10.loopAllErrorsAsTriggerErrorToast(error);
+      });
+    },
     //Triggers
     triggerSuccessToast: function triggerSuccessToast(message) {
       this.$toast.success(message, {
@@ -69136,7 +69594,7 @@ var axiosCalls = {
     },
     // Loop all errors
     loopAllErrorsAsTriggerErrorToast: function loopAllErrorsAsTriggerErrorToast(errorResponse) {
-      var _this10 = this;
+      var _this11 = this;
 
       if ('response' in errorResponse && 'errors' in errorResponse.response.data) {
         var errors = [];
@@ -69144,7 +69602,7 @@ var axiosCalls = {
           errors = errors.concat(error);
         });
         errors.forEach(function (error) {
-          return _this10.triggerErrorToast(error);
+          return _this11.triggerErrorToast(error);
         });
       } else if (errorResponse.response.data.message) {
         this.triggerErrorToast(errorResponse.response.data.message);
