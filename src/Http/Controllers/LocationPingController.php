@@ -4,6 +4,7 @@ namespace Xguard\Coordinator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Xguard\Coordinator\Http\Requests\LocationPingPostRequest;
 use Xguard\Coordinator\Models\LocationPing;
@@ -11,6 +12,9 @@ use Xguard\Coordinator\Repositories\LocationPathRepository;
 
 class LocationPingController extends Controller
 {
+    const TIME_THRESHOLD = 'timeThreshold';
+    const DISTANCE_THRESHOLD = 'distanceThreshold';
+
     public function store(LocationPingPostRequest $request): \Illuminate\Http\Response
     {
         $locationPing = LocationPing::create([
@@ -21,8 +25,9 @@ class LocationPingController extends Controller
         return Response::make([LocationPing::ID => $locationPing->id], ResponseAlias::HTTP_CREATED);
     }
 
-    public function getSupervisorShiftLocationPings(int $supervisorShiftId)
+    public function getSupervisorShiftLocationPings(int $supervisorShiftId, Request $request)
     {
-        return LocationPathRepository::getSupervisorShiftPathData($supervisorShiftId);
+        $thresholds = $request->all();
+        return LocationPathRepository::getSupervisorShiftPathData($supervisorShiftId, $thresholds[self::TIME_THRESHOLD], $thresholds[self::DISTANCE_THRESHOLD]);
     }
 }
