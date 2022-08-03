@@ -7,7 +7,6 @@ use Xguard\Coordinator\Models\LocationPing;
 
 class LocationPathRepository
 {
-    const FIVE_MINUTES = 5;
     const START_PING_ID = 'startPingId';
     const START_LAT = 'startLat';
     const START_LNG = 'startLng';
@@ -16,22 +15,25 @@ class LocationPathRepository
     const END_LAT = 'endLat';
     const END_LNG = 'endLng';
     const END_TIME = 'endTime';
-    const TOTAL_TIME = 'totalTime';
     const AVERAGE_LAT = 'averageLat';
     const AVERAGE_LNG = 'averageLng';
-    const LAT = 'lat';
-    const LNG = 'lng';
+    const TOTAL_TIME = 'totalTime';
     const PATH = 'path';
     const STOPS = 'stops';
+    const LAT = 'lat';
+    const LNG = 'lng';
 
-    public static function getSupervisorShiftPathData(int $supervisorShiftId)
-    {
+    public static function getSupervisorShiftPathData(
+        int $supervisorShiftId,
+        int $timeThreshold,
+        int $distanceThreshold
+    ) {
         $locationPings = LocationPing::where(LocationPing::SUPERVISOR_SHIFT_ID, $supervisorShiftId)->get();
-        $data = self::formatSupervisorShiftPathData($locationPings);
+        $data = self::formatSupervisorShiftPathData($locationPings, $timeThreshold, $distanceThreshold);
         return $data;
     }
 
-    private static function formatSupervisorShiftPathData($pings)
+    private static function formatSupervisorShiftPathData($pings, int $timeThreshold, int $distanceThreshold)
     {
         $currentPing = [
             self::START_PING_ID => null,
@@ -49,26 +51,26 @@ class LocationPathRepository
 
         $stops = [];
 
-        $path = $pings->map(function ($ping) use (&$stops, &$currentPing) {
+        $path = $pings->map(function ($ping) use ($distanceThreshold, $timeThreshold, &$stops, &$currentPing) {
 
             $distanceFromPreviousSavedPoint = self::haversineGreatCircleDistance(
                 $currentPing[self::START_LAT],
-                $currentPing[self::START_LAT],
+                $currentPing[self::START_LNG],
                 $ping->lat,
                 $ping->lng
             );
 
-            if ($distanceFromPreviousSavedPoint < 100) {
-                $currentPing[self::END_PING_ID] =  $ping->id;
-                $currentPing[self::END_LAT] =  $ping->lat;
-                $currentPing[self::END_LNG] =  $ping->lng;
-                $currentPing[self::END_TIME] =  $ping->created_at;
-                $currentPing[self::TOTAL_TIME] =  Carbon::parse($ping->created_at)->diffInMinutes($currentPing[self::START_TIME]);
-                $currentPing[self::AVERAGE_LAT] = $currentPing[self::AVERAGE_LAT]? ($ping->lat + $currentPing[self::AVERAGE_LAT])/2 : $ping->lat;
-                $currentPing[self::AVERAGE_LNG] =  $currentPing[self::AVERAGE_LNG]? ($ping->lng + $currentPing[self::AVERAGE_LNG])/2 : $ping->lng ;
+            if ($distanceFromPreviousSavedPoint < $distanceThreshold) {
+                $currentPing[self::END_PING_ID] = $ping->id;
+                $currentPing[self::END_LAT] = $ping->lat;
+                $currentPing[self::END_LNG] = $ping->lng;
+                $currentPing[self::END_TIME] = $ping->created_at;
+                $currentPing[self::TOTAL_TIME] = Carbon::parse($ping->created_at)->diffInMinutes($currentPing[self::START_TIME]);
+                $currentPing[self::AVERAGE_LAT] = $currentPing[self::AVERAGE_LAT] ? ($ping->lat + $currentPing[self::AVERAGE_LAT]) / 2 : $ping->lat;
+                $currentPing[self::AVERAGE_LNG] = $currentPing[self::AVERAGE_LNG] ? ($ping->lng + $currentPing[self::AVERAGE_LNG]) / 2 : $ping->lng;
             } else {
-                if ($currentPing[self::TOTAL_TIME] > self::FIVE_MINUTES) {
-                    array_push($stops, (object)$currentPing);
+                if ($currentPing[self::TOTAL_TIME] >= $timeThreshold) {
+                    array_push($stops, (object) $currentPing);
                 }
 
                 $currentPing = [
@@ -92,8 +94,8 @@ class LocationPathRepository
         });
 
         //if last ping includes a stop
-        if ($currentPing[self::TOTAL_TIME] >= self::FIVE_MINUTES) {
-            array_push($stops, (object)$currentPing);
+        if ($currentPing[self::TOTAL_TIME] >= $timeThreshold) {
+            array_push($stops, (object) $currentPing);
         }
 
         return [

@@ -61,17 +61,19 @@
                     </div>
                     <div v-bind:class="{'hidden': openTab !== 2, 'block': openTab === 2}">
 
-                        <stop-card
-                            v-for="(stopMarker, index) in mapPaneData.pathData.stopsMarkers"
-                            :key="index"
-                            :stopMarker="stopMarker"
-                            @click.native="openGmapWindow(stopMarker, index)"
-                        ></stop-card>
-
                         <h1 v-if="mapPaneData.pathData.stopsMarkers.length === 0"
                             class="text-lg tracking-wide text-indigo-900 font-bold text-center my-5">
                             no stops found
                         </h1>
+
+                        <div v-else>
+                            <stop-card
+                                v-for="(stopMarker, index) in mapPaneData.pathData.stopsMarkers"
+                                :key="index"
+                                :stopMarker="stopMarker"
+                                @click.native="openGmapWindow(stopMarker, index)"
+                            ></stop-card>
+                        </div>
 
                     </div>
                     <div v-bind:class="{'hidden': openTab !== 3, 'block': openTab === 3}">

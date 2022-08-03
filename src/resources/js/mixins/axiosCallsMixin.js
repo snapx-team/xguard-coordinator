@@ -77,8 +77,12 @@ export const axiosCalls = {
 
         // Location
 
-        asyncGetLocationPathData(supervisorShiftId) {
-            return axios.get('get-location-pings/' + supervisorShiftId).catch((error) => {
+        asyncGetLocationPathData(supervisorShiftId, distanceThreshold, timeThreshold) {
+            return axios.get('get-location-pings/' + supervisorShiftId, {
+                params: {
+                    distanceThreshold: distanceThreshold,
+                    timeThreshold: timeThreshold
+                }}).catch((error) => {
                 this.loopAllErrorsAsTriggerErrorToast(error);
             });
         },
