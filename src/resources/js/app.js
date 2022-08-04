@@ -18,6 +18,13 @@ import VueImg from 'v-img';
 
 Vue.config.productionTip = false;
 
+Vue.use(VueGoogleMaps, {
+    load: {
+        key: '',
+        libraries: 'places'
+    },
+    installComponents: true
+});
 Vue.use(Toast, {
     transition: 'Vue-Toastification__fade',
     maxToasts: 20,
@@ -26,14 +33,11 @@ Vue.use(Toast, {
 Vue.use(VueImg);
 Vue.use(VueSweetalert2);
 Vue.use(DatePicker);
-Vue.use(VueMoment, {moment,});
+Vue.use(VueMoment, {moment});
 Vue.use(device);
 Vue.use(VueCrontab);
-Vue.use(VueGoogleMaps, {
-    load: {
-        key: ''
-    }
-});
+
+
 
 let globalData = new Vue({
     data: {$role: 'employee'}

@@ -146,6 +146,24 @@
                             </table>
                         </div>
 
+                        <div class="shadow-md rounded-lg overflow-hidden m-2">
+                            <h3 class="px-5 py-3 border-b-2 border-gray-200 bg-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Trip Estimate (based on distance threshold)
+                            </h3>
+                            <table class="min-w-full leading-normal">
+                                <tbody>
+                                <tr>
+                                    <td class="px-5 py-5 bg-white text-sm">
+                                        <p class="text-gray-900 whitespace-no-wrap font-bold">Total Travel:</p>
+                                    </td>
+                                    <td class="px-5 py-5 bg-white text-sm">
+                                        <p class="text-gray-900 whitespace-no-wrap">{{ (mapPaneData.pathData.totalDistance/1000).toFixed(2) }}km</p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
                         <loading-animation v-if="isLoadingImages" :size="50" class="m-auto mt-7"></loading-animation>
 
                         <div v-else class="bg-gray-200 shadow-md rounded-lg m-2">

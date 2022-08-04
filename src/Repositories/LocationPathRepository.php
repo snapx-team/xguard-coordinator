@@ -7,11 +7,9 @@ use Xguard\Coordinator\Models\LocationPing;
 
 class LocationPathRepository
 {
-    const START_PING_ID = 'startPingId';
     const START_LAT = 'startLat';
     const START_LNG = 'startLng';
     const START_TIME = 'startTime';
-    const END_PING_ID = 'endPingId';
     const END_LAT = 'endLat';
     const END_LNG = 'endLng';
     const END_TIME = 'endTime';
@@ -22,6 +20,8 @@ class LocationPathRepository
     const STOPS = 'stops';
     const LAT = 'lat';
     const LNG = 'lng';
+    const TOTAL_DISTANCE = 'totalDistance';
+    const CREATED_AT = 'createdAt';
 
     public static function getSupervisorShiftPathData(
         int $supervisorShiftId,
@@ -35,15 +35,14 @@ class LocationPathRepository
 
     private static function formatSupervisorShiftPathData($pings, int $timeThreshold, int $distanceThreshold)
     {
+        $firstPing = $pings->shift();
         $currentPing = [
-            self::START_PING_ID => null,
-            self::START_LAT => null,
-            self::START_LNG => null,
-            self::START_TIME => null,
-            self::END_PING_ID => null,
+            self::START_LAT => $firstPing->lat,
+            self::START_LNG => $firstPing->lng,
+            self::START_TIME => $firstPing->created_at,
+            self::END_TIME => null,
             self::END_LAT => null,
             self::END_LNG => null,
-            self::END_TIME => null,
             self::TOTAL_TIME => null,
             self::AVERAGE_LAT => null,
             self::AVERAGE_LNG => null,
@@ -51,7 +50,15 @@ class LocationPathRepository
 
         $stops = [];
 
-        $path = $pings->map(function ($ping) use ($distanceThreshold, $timeThreshold, &$stops, &$currentPing) {
+        $totalDistance = 0;
+
+        $path = $pings->map(function ($ping) use (
+            $distanceThreshold,
+            $timeThreshold,
+            &$stops,
+            &$currentPing,
+            &$totalDistance
+        ) {
 
             $distanceFromPreviousSavedPoint = self::haversineGreatCircleDistance(
                 $currentPing[self::START_LAT],
@@ -61,7 +68,6 @@ class LocationPathRepository
             );
 
             if ($distanceFromPreviousSavedPoint < $distanceThreshold) {
-                $currentPing[self::END_PING_ID] = $ping->id;
                 $currentPing[self::END_LAT] = $ping->lat;
                 $currentPing[self::END_LNG] = $ping->lng;
                 $currentPing[self::END_TIME] = $ping->created_at;
@@ -72,14 +78,13 @@ class LocationPathRepository
                 if ($currentPing[self::TOTAL_TIME] >= $timeThreshold) {
                     array_push($stops, (object) $currentPing);
                 }
+                $totalDistance += $distanceFromPreviousSavedPoint;
 
                 $currentPing = [
                     self::START_LAT => $ping->lat,
                     self::START_LNG => $ping->lng,
                     self::END_LAT => null,
                     self::END_LNG => null,
-                    self::START_PING_ID => $ping->id,
-                    self::END_PING_ID => null,
                     self::START_TIME => $ping->created_at,
                     self::END_TIME => null,
                     self::TOTAL_TIME => null,
@@ -87,9 +92,11 @@ class LocationPathRepository
                     self::AVERAGE_LNG => null,
                 ];
             }
+
             return [
                 self::LAT => $ping->lat,
                 self::LNG => $ping->lng,
+                self::CREATED_AT => $ping->created_at,
             ];
         });
 
@@ -99,6 +106,7 @@ class LocationPathRepository
         }
 
         return [
+            self::TOTAL_DISTANCE => $totalDistance,
             self::PATH => $path,
             self::STOPS => $stops,
         ];

@@ -53,6 +53,16 @@
 
             <hr class="mb-5"/>
 
+            <div class="flex items-center" v-if="mapPaneData.pathData.path.length > 0">
+                <div class="w-40">
+                    <p class="font-bold text-gray-600">Time:
+                        {{ mapPaneData.pathData.path[selectedPathPing].createdAt | moment("HH:mm") }}</p>
+                    <p class="font-semibold text-xs text-gray-400">Ping: {{ selectedPathPing }}</p>
+                </div>
+                <input v-model="selectedPathPing" id="range" type="range" name="positionSlider" :min="1"
+                       :max="mapPaneData.pathData.path.length -1" class="w-full h-2 bg-blue-100 appearance-none"/>
+            </div>
+
             <div>
                 <div>
                     <button
@@ -70,59 +80,10 @@
                             <SupervisorPane :supervisors-data="supervisorsData"/>
                         </pane>
                         <pane :size="50" class="flex-grow">
-                            <div class="relative">
-                                <transition enter-active-class="transition duration-500 ease-out transform"
-                                            enter-class=" opacity-0 bg-blue-200"
-                                            leave-active-class="transition duration-300 ease-in transform"
-                                            leave-to-class="opacity-0 bg-blue-200">
-                                    <div class="z-50 overflow-auto absolute inset-0 bg-gray-400 bg-opacity-50 flex"
-                                         v-if="isLoadingLocationPathData">
-                                        <loading-animation :size="70" class="m-auto"></loading-animation>
-                                    </div>
-                                </transition>
-
-                                <gmap-map id="map" v-bind="mapPaneData.options" :key="mapPaneData.googleMapRefreshKey">
-
-                                    <gmap-marker
-                                        :key="index"
-                                        v-for="(m, index) in mapPaneData.jobSiteMarkers"
-                                        :position="m.position"
-                                        :icon="m.icon"
-                                        :clickable="true"
-                                        :label="m.label"
-                                        @click="openWindow(m, index)"
-                                    />
-
-                                    <gmap-marker
-                                        :key="index"
-                                        v-for="(m, index) in mapPaneData.pathData.stopsMarkers"
-                                        :position="m.position"
-                                        :icon="m.icon"
-                                        :clickable="true"
-                                        @click="openWindow(m, index)"
-                                    />
-
-                                    <GmapCircle
-                                        v-if="selectedStopMarker"
-                                        :center="selectedStopMarker"
-                                        :radius="distanceThreshold"
-                                        :visible="true"
-                                        :options="{fillColor:'blue',fillOpacity:0.1}"
-                                    ></GmapCircle>
-
-                                    <gmap-info-window
-                                        @closeclick="mapPaneData.window_open=false"
-                                        :opened="mapPaneData.window_open"
-                                        :position="mapPaneData.infoPosition"
-                                        :options="mapPaneData.infoOptions"
-                                    >
-                                    </gmap-info-window>
-
-                                    <gmap-polyline v-bind:path.sync="mapPaneData.pathData.path"
-                                                   v-bind:options="{ strokeColor:'#43f5ff'}"></gmap-polyline>
-
-                                </gmap-map>
-                            </div>
+                            <MapPane :distance-threshold="distanceThreshold"
+                                     :is-loading-location-path-data="isLoadingLocationPathData"
+                                     :map-pane-data="mapPaneData"
+                                     :selected-path-ping="selectedPathPing"/>
                         </pane>
                         <pane :size="20" min-size="15" :max-size="35" v-if="dataPaneIsVisible"
                               class="bg-indigo-50 h-max">
@@ -142,20 +103,19 @@
 import {axiosCalls} from "../../mixins/axiosCallsMixin";
 import {Pane, Splitpanes} from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import {gmapApi} from "vue2-google-maps";
 import DataPane from "./dashboardComponents/DataPane";
 import SupervisorPane from "./dashboardComponents/SupervisorPane";
 import moment from "moment";
 import Counter from "../global/Counter";
-import LoadingAnimation from "../global/LoadingAnimation";
 import _ from "lodash"
+import MapPane from "./dashboardComponents/MapPane";
 
 export default {
 
     inject: ["eventHub"],
 
     components: {
-        LoadingAnimation,
+        MapPane,
         Counter,
         SupervisorPane,
         DataPane,
@@ -180,9 +140,9 @@ export default {
 
     data() {
         return {
+            selectedPathPing: 0,
             distanceThreshold: 50,
             timeThreshold: 5,
-            selectedStopMarker: null,
             isLoadingLocationPathData: false,
             componentKey: 0,
             supervisorsData: null,
@@ -215,6 +175,7 @@ export default {
                     stops: [],
                     stopsMarkers: [],
                     path: [],
+                    totalDistance: 0,
                 },
             },
             dataPaneIsVisible: false,
@@ -245,14 +206,8 @@ export default {
         };
     },
 
-    computed: {
-        google: gmapApi,
-    },
-
     created() {
-        this.eventHub.$on("open-gmap-window", (data) => {
-            this.openWindow(data.marker, data.index);
-        });
+
         this.eventHub.$on("show-data-pane-info", (supervisorShiftData) => {
             this.showDataPaneInfo(supervisorShiftData);
         });
@@ -268,7 +223,6 @@ export default {
     },
 
     beforeDestroy() {
-        this.eventHub.$off('open-gmap-window');
         this.eventHub.$off('show-data-pane-info');
         this.eventHub.$off('toggle-supervisor-pane');
         this.eventHub.$off('toggle-data-pane');
@@ -284,7 +238,6 @@ export default {
 
         reloadLocationPathData() {
             if (this.selectedSupervisorShift) {
-                this.selectedStopMarker = null;
                 this.mapPaneData.window_open = false
                 this.loadLocationPathData()
             }
@@ -295,6 +248,7 @@ export default {
             this.asyncGetLocationPathData(this.selectedSupervisorShift.id, this.distanceThreshold, this.timeThreshold).then((data) => {
                 this.mapPaneData.pathData.path = data.data.path;
                 this.mapPaneData.pathData.stops = data.data.stops;
+                this.mapPaneData.pathData.totalDistance = data.data.totalDistance;
                 this.setStopsMarkers();
                 this.isLoadingLocationPathData = false
             });
@@ -356,53 +310,6 @@ export default {
                 type: 'stop'
             }));
         },
-
-        getPosition: function (marker) {
-            return {
-                lat: marker.position.lat,
-                lng: marker.position.lng
-            };
-        },
-
-        openWindow(marker, index) {
-            this.dataPaneIsVisible = true;
-            this.mapPaneData.infoPosition = this.getPosition(marker);
-            if (marker.type === 'jobSiteVisit') {
-                this.mapPaneData.infoOptions.content =
-                    '<div class="">' +
-                    '<p class="font-semibold pb-2">' +
-                    marker.name +
-                    '</p>' +
-                    '<p class="">' +
-                    marker.address +
-                    '</p>' +
-                    '</div>';
-            } else if (marker.type === 'stop') {
-                this.selectedStopMarker = marker.position
-                this.mapPaneData.infoOptions.content =
-                    '<div class="">' +
-                    '<p class="font-semibold pb-2">' +
-                    'Stopped roughly ' + marker.totalTime + ' minutes' +
-                    '</p>' +
-                    '<p class="font-semibold pb-2">' +
-                    'Between: ' + moment.utc(marker.startTime).format('HH:mm') + 'h - ' + moment.utc(marker.endTime).format('HH:mm') + 'h ' +
-                    '</p>' +
-                    '<p class="pb-2">' +
-                    'Coordinates:' +
-                    '</p>' +
-                    '<p class="">' +
-                    marker.coordinates +
-                    '</p>' +
-                    '</div>';
-            }
-
-            if (this.mapPaneData.currentMarkerIndex === index) {
-                this.mapPaneData.window_open = !this.mapPaneData.window_open;
-            } else {
-                this.mapPaneData.window_open = true;
-                this.mapPaneData.currentMarkerIndex = index;
-            }
-        },
     },
 };
 </script>
@@ -411,12 +318,6 @@ export default {
 
 .splitpanes__pane {
     height: auto;
-}
-
-#map {
-    height: 600px;
-    width: 100%;
-    margin: 0 auto;
 }
 
 .list-inline-item {
