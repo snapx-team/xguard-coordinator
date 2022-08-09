@@ -29,6 +29,9 @@ class LocationPathRepository
         int $distanceThreshold
     ) {
         $locationPings = LocationPing::where(LocationPing::SUPERVISOR_SHIFT_ID, $supervisorShiftId)->get();
+        if ($locationPings->isEmpty()) {
+            return null;
+        }
         $data = self::formatSupervisorShiftPathData($locationPings, $timeThreshold, $distanceThreshold);
         return $data;
     }

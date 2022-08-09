@@ -246,10 +246,12 @@ export default {
         loadLocationPathData() {
             this.isLoadingLocationPathData = true
             this.asyncGetLocationPathData(this.selectedSupervisorShift.id, this.distanceThreshold, this.timeThreshold).then((data) => {
-                this.mapPaneData.pathData.path = data.data.path;
-                this.mapPaneData.pathData.stops = data.data.stops;
-                this.mapPaneData.pathData.totalDistance = data.data.totalDistance;
-                this.setStopsMarkers();
+                if(data.data !== ''){
+                    this.mapPaneData.pathData.path = data.data.path;
+                    this.mapPaneData.pathData.stops = data.data.stops;
+                    this.mapPaneData.pathData.totalDistance = data.data.totalDistance;
+                    this.setStopsMarkers();
+                }
                 this.isLoadingLocationPathData = false
             });
         },

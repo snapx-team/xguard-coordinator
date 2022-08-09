@@ -7605,11 +7605,13 @@ __webpack_require__.r(__webpack_exports__);
 
       this.isLoadingLocationPathData = true;
       this.asyncGetLocationPathData(this.selectedSupervisorShift.id, this.distanceThreshold, this.timeThreshold).then(function (data) {
-        _this2.mapPaneData.pathData.path = data.data.path;
-        _this2.mapPaneData.pathData.stops = data.data.stops;
-        _this2.mapPaneData.pathData.totalDistance = data.data.totalDistance;
+        if (data.data !== '') {
+          _this2.mapPaneData.pathData.path = data.data.path;
+          _this2.mapPaneData.pathData.stops = data.data.stops;
+          _this2.mapPaneData.pathData.totalDistance = data.data.totalDistance;
 
-        _this2.setStopsMarkers();
+          _this2.setStopsMarkers();
+        }
 
         _this2.isLoadingLocationPathData = false;
       });
@@ -9027,7 +9029,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n.splitpanes__pane[data-v-0617fb13] {\r\n    height: auto;\n}\n.list-inline-item[data-v-0617fb13] {\r\n    cursor: pointer;\n}\r\n\r\n", ""]);
+exports.push([module.i, "\n.splitpanes__pane[data-v-0617fb13] {\n    height: auto;\n}\n.list-inline-item[data-v-0617fb13] {\n    cursor: pointer;\n}\n\n", ""]);
 
 // exports
 
