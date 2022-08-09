@@ -26,10 +26,8 @@ class SupervisorController extends Controller
 
     public function getUserShiftOdometerImages($userId, $shiftId)
     {
-        try {
-            return app(GetUserShiftOdometerImagesAction::class)->fill([self::USER_ID => $userId, self::SHIFT_ID => $shiftId])->run();
-        } catch (\Exception $e) {
-            return new JsonResponse([], $e->getCode(), $e->getMessage());
-        }
+        return app(GetUserShiftOdometerImagesAction::class)->fill([
+            self::USER_ID => $userId, self::SHIFT_ID => $shiftId
+        ])->run();
     }
 }
