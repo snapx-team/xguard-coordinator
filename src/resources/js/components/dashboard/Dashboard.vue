@@ -250,8 +250,13 @@ export default {
                     this.mapPaneData.pathData.path = data.data.path;
                     this.mapPaneData.pathData.stops = data.data.stops;
                     this.mapPaneData.pathData.totalDistance = data.data.totalDistance;
-                    this.setStopsMarkers();
                 }
+                else{
+                    this.mapPaneData.pathData.path = [];
+                    this.mapPaneData.pathData.stops = [];
+                    this.mapPaneData.pathData.totalDistance = 0;
+                }
+                this.setStopsMarkers();
                 this.isLoadingLocationPathData = false
             });
         },
@@ -292,7 +297,9 @@ export default {
                 position: {lat: parseFloat(e.address.lat), lng: parseFloat(e.address.lng)},
                 name: e.jobSite.contracts[0].name,
                 address: e.address.name,
-                type: 'jobSiteVisit'
+                type: 'jobSiteVisit',
+                startTime: e.startTime,
+                endTime: e.endTime
             }));
         },
 

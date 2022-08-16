@@ -4,6 +4,7 @@ namespace Xguard\Coordinator\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobSiteSubaddress;
+use Illuminate\Support\Facades\Date;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Xguard\Coordinator\Http\Requests\JobSiteVisitPatchRequest;
 use Xguard\Coordinator\Http\Requests\JobSiteVisitPostRequest;
@@ -27,7 +28,7 @@ class JobSiteVisitController extends Controller
         $jobSiteVisit = JobSiteVisit::create([
             JobSiteVisit::SUPERVISOR_SHIFT_ID => $request->supervisor_shift_id,
             JobSiteVisit::JOB_SITE_ID => $request->is_primary_address?  $request->address_id : JobSiteSubaddress::find($request->address_id)->id,
-            JobSiteVisit::START_TIME => $request->start_time
+            JobSiteVisit::START_TIME => Date::now()
         ]);
         return response([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_CREATED);
     }
@@ -40,7 +41,7 @@ class JobSiteVisitController extends Controller
     public function update(JobSiteVisitPatchRequest $request)
     {
         $jobSiteVisit = JobSiteVisit::find($request->id);
-        $jobSiteVisit->fill([JobSiteVisit::END_TIME => $request->end_time])->save();
+        $jobSiteVisit->fill([JobSiteVisit::END_TIME => Date::now()])->save();
         $jobSiteVisit->refresh();
         return response([JobSiteVisit::ID => $jobSiteVisit->id], ResponseAlias::HTTP_OK);
     }

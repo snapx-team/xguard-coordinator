@@ -11,7 +11,6 @@ class SupervisorShiftPatchRequest extends BaseFormRequest
     {
         return [
             SupervisorShift::ID => 'required|exists:Xguard\Coordinator\Models\SupervisorShift,id',
-            SupervisorShift::END_TIME => 'required|date',
             SupervisorShift::END_LAT => 'required|numeric',
             SupervisorShift::END_LNG => 'required|numeric',
         ];

@@ -32,7 +32,7 @@ class GetSupervisorsDataActionTest extends TestCase
 
     public function testRetrieveOnlySupervisors()
     {
-        $newUser = factory(User::class)->create();
+        $newUser = factory(User::class)->states('employee', 'verified')->create();
         $dateRage = ['start' => Carbon::now()->format('Y-m-d'), 'end' => Carbon::yesterday()->format('Y-m-d')];
 
         $supervisorsData = app(GetSupervisorsDataAction::class)->fill(['dateRange' => $dateRage])->run();

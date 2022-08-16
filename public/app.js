@@ -7609,9 +7609,13 @@ __webpack_require__.r(__webpack_exports__);
           _this2.mapPaneData.pathData.path = data.data.path;
           _this2.mapPaneData.pathData.stops = data.data.stops;
           _this2.mapPaneData.pathData.totalDistance = data.data.totalDistance;
-
-          _this2.setStopsMarkers();
+        } else {
+          _this2.mapPaneData.pathData.path = [];
+          _this2.mapPaneData.pathData.stops = [];
+          _this2.mapPaneData.pathData.totalDistance = 0;
         }
+
+        _this2.setStopsMarkers();
 
         _this2.isLoadingLocationPathData = false;
       });
@@ -7655,7 +7659,9 @@ __webpack_require__.r(__webpack_exports__);
           },
           name: e.jobSite.contracts[0].name,
           address: e.address.name,
-          type: 'jobSiteVisit'
+          type: 'jobSiteVisit',
+          startTime: e.startTime,
+          endTime: e.endTime
         };
       });
     },
@@ -7956,6 +7962,10 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global_Avatar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global/Avatar */ "./src/resources/js/components/global/Avatar.vue");
+//
+//
+//
+//
 //
 //
 //
@@ -39251,6 +39261,38 @@ var render = function () {
             _c("small", { staticClass: "text-gray-400 text-xs" }, [
               _vm._v(_vm._s(_vm.jobSiteMarker.address)),
             ]),
+            _vm._v(" "),
+            _vm.jobSiteMarker.endTime
+              ? _c(
+                  "p",
+                  { staticClass: "font-semibold text-xs pt-2 text-purple-700" },
+                  [
+                    _vm._v(
+                      "visited between:\n                " +
+                        _vm._s(
+                          _vm._f("moment")(_vm.jobSiteMarker.startTime, "HH:mm")
+                        ) +
+                        "h - " +
+                        _vm._s(
+                          _vm._f("moment")(_vm.jobSiteMarker.endTime, "HH:mm")
+                        ) +
+                        "h\n            "
+                    ),
+                  ]
+                )
+              : _c(
+                  "p",
+                  { staticClass: "font-semibold text-xs pt-2 text-purple-700" },
+                  [
+                    _vm._v(
+                      "started visit at:\n                " +
+                        _vm._s(
+                          _vm._f("moment")(_vm.jobSiteMarker.startTime, "HH:mm")
+                        ) +
+                        "h\n            "
+                    ),
+                  ]
+                ),
           ]
         ),
       ]),
