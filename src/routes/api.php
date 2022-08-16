@@ -17,6 +17,7 @@ Route::group(['namespace' => 'Xguard\Coordinator\Http\Controllers',], function (
 
         Route::post('/shift', 'SupervisorShiftController@store')->name('.create-shift');
         Route::patch('/shift', 'SupervisorShiftController@update')->name('.update-shift');
+        Route::get('/check-previous-shift/{userId}', 'SupervisorShiftController@checkPreviousShiftCompleted')->name('.check-previous-shift');
 
         Route::post('/odometer', 'OdometerController@store')->name('.create-odometer');
         Route::patch('/odometer', 'OdometerController@update')->name('.update-odometer');

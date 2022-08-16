@@ -11,10 +11,8 @@ class SupervisorShiftPostRequest extends BaseFormRequest
     {
         return [
             SupervisorShift::USER_ID => 'required|exists:App\Models\User,id',
-            SupervisorShift::START_TIME => 'required|date',
             SupervisorShift::START_LAT => 'required|numeric',
             SupervisorShift::START_LNG => 'required|numeric',
-
         ];
     }
 }

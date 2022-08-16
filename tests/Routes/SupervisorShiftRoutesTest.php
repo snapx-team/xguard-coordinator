@@ -7,6 +7,7 @@ use Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Xguard\Coordinator\Models\Odometer;
 use Xguard\Coordinator\Models\SupervisorShift;
 
 /**
@@ -18,6 +19,9 @@ class SupervisorShiftRoutesTest extends TestCase
 
     const COORDINATOR_CREATE_SHIFT = 'coordinator.create-shift';
     const COORDINATOR_UPDATE_SHIFT = 'coordinator.update-shift';
+    const COORDINATOR_CHECK_PREVIOUS_SHIFT = 'coordinator.check-previous-shift';
+    const USER_ID = 'userId';
+    const ODOMETER_ID = 'odometer_id';
 
     public function setUp(): void
     {
@@ -32,14 +36,13 @@ class SupervisorShiftRoutesTest extends TestCase
         $apiCall = route(self::COORDINATOR_CREATE_SHIFT);
         $data = [
             SupervisorShift::USER_ID => $user->id,
-            SupervisorShift::START_TIME => $this->faker->date(),
             SupervisorShift::START_LAT => $this->faker->latitude,
             SupervisorShift::START_LNG => $this->faker->longitude,
         ];
         $response = $this->post($apiCall, $data);
         $count = count(SupervisorShift::all());
         $this->assertTrue($count == 1);
-        $response->assertSuccessful()->assertJson(['id' => 1]);
+        $response->assertSuccessful()->assertJson([SupervisorShift::ID => 1]);
     }
 
     public function testUpdateSupervisorShift()
@@ -48,7 +51,6 @@ class SupervisorShiftRoutesTest extends TestCase
         $apiCall = route(self::COORDINATOR_UPDATE_SHIFT);
         $data = [
             SupervisorShift::ID => $supervisorShift->id,
-            SupervisorShift::END_TIME => $this->faker->date(),
             SupervisorShift::END_LAT => $this->faker->latitude,
             SupervisorShift::END_LNG => $this->faker->longitude,
         ];
@@ -56,26 +58,25 @@ class SupervisorShiftRoutesTest extends TestCase
         $response->assertOk();
     }
 
-    public function testStartTimeIsRequiredIfUserIdIsPresentValidations()
-    {
-        $user = factory(User::class)->states(['verified', 'employee'])->create();
-        $apiCall = route(self::COORDINATOR_CREATE_SHIFT);
-
-        $data = [
-            SupervisorShift::USER_ID => $user->id,
-        ];
-        $response = $this->post($apiCall, $data);
-        $response->assertJsonValidationErrors([SupervisorShift::START_TIME]);
-    }
-
     public function testUserIdMustBeValidValidation()
     {
         $apiCall = route(self::COORDINATOR_CREATE_SHIFT);
         $data = [
             SupervisorShift::USER_ID => 'invalid user id',
-            SupervisorShift::START_TIME => $this->faker->date()
         ];
         $response = $this->post($apiCall, $data);
         $response->assertJsonValidationErrors([SupervisorShift::USER_ID]);
+    }
+
+    public function testCheckPreviousShift()
+    {
+        $apiCall = route(self::COORDINATOR_CHECK_PREVIOUS_SHIFT, [self::USER_ID => 1]);
+        $response1 = $this->get($apiCall);
+        $response1->assertSuccessful()->assertJson([SupervisorShift::ID => null]);
+
+        $supervisorShift = factory(SupervisorShift::class)->create([SupervisorShift::USER_ID => 1]);
+        $odometer = factory(Odometer::class)->create([Odometer::SUPERVISOR_SHIFT_ID => $supervisorShift->id]);
+        $response2 = $this->get($apiCall);
+        $response2->assertSuccessful()->assertJson([SupervisorShift::ID => $supervisorShift->id, self::ODOMETER_ID => $odometer->id ]);
     }
 }

@@ -10,8 +10,8 @@ class JobSiteVisitResource extends JsonResource
     {
         return [
             'id'=> $this->id,
-            'startTime'=> $this->startTime,
-            'endTime'=> $this->endTime,
+            'startTime'=> $this->start_time,
+            'endTime'=> $this->end_time,
             'address'=> $this->whenAppended('address'),
             'jobSite' => new JobSiteResource($this->whenLoaded('jobSite'))
         ];
