@@ -15,7 +15,6 @@ class JobSiteVisitPostRequest extends BaseFormRequest
         $rules = [
             JobSiteVisit::SUPERVISOR_SHIFT_ID => 'required|exists:Xguard\Coordinator\Models\SupervisorShift,id',
             JobSiteVisit::IS_PRIMARY_ADDRESS => 'required',
-            JobSiteVisit::START_TIME => 'required|date',
         ];
 
         return array_merge($rules, $addressIdExistsInJobSiteOrSubaddressTable);

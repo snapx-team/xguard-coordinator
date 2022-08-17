@@ -10,7 +10,6 @@ class JobSiteVisitPatchRequest extends BaseFormRequest
     {
         return  [
             JobSiteVisit::ID => 'required|exists:Xguard\Coordinator\Models\JobSiteVisit,id',
-            JobSiteVisit::END_TIME => 'required|date',
         ];
     }
 }
