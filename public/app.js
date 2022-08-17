@@ -8176,7 +8176,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     dateRangeText: function dateRangeText() {
-      return this.shift.endTime ? moment__WEBPACK_IMPORTED_MODULE_0___default.a.utc(this.shift.startTime).format('MMM DD, HH:mm') + " - " + moment__WEBPACK_IMPORTED_MODULE_0___default.a.utc(this.shift.endTime).format('MMM DD, HH:mm') : moment__WEBPACK_IMPORTED_MODULE_0___default.a.utc(this.shift.startTime).format('MMM DD, HH:mm') + " - in progress";
+      return this.shift.endTime ? moment__WEBPACK_IMPORTED_MODULE_0___default()(this.shift.startTime).format('MMM DD, HH:mm') + " - " + moment__WEBPACK_IMPORTED_MODULE_0___default()(this.shift.endTime).format('MMM DD, HH:mm') : moment__WEBPACK_IMPORTED_MODULE_0___default()(this.shift.startTime).format('MMM DD, HH:mm') + " - in progress";
     }
   }
 });
@@ -9039,7 +9039,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "\n.splitpanes__pane[data-v-0617fb13] {\n    height: auto;\n}\n.list-inline-item[data-v-0617fb13] {\n    cursor: pointer;\n}\n\n", ""]);
+exports.push([module.i, "\n.splitpanes__pane[data-v-0617fb13] {\r\n    height: auto;\n}\n.list-inline-item[data-v-0617fb13] {\r\n    cursor: pointer;\n}\r\n\r\n", ""]);
 
 // exports
 

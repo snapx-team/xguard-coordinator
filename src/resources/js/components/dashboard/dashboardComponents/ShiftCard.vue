@@ -24,8 +24,8 @@ export default {
     },
     computed: {
         dateRangeText(){
-            return this.shift.endTime? moment.utc(this.shift.startTime).format('MMM DD, HH:mm') + " - " + moment.utc(this.shift.endTime).format('MMM DD, HH:mm')
-                : moment.utc(this.shift.startTime).format('MMM DD, HH:mm') + " - in progress" ;
+            return this.shift.endTime? moment(this.shift.startTime).format('MMM DD, HH:mm') + " - " + moment(this.shift.endTime).format('MMM DD, HH:mm')
+                : moment(this.shift.startTime).format('MMM DD, HH:mm') + " - in progress" ;
         }
     },
 };

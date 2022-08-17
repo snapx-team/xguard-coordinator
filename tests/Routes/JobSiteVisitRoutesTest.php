@@ -46,7 +46,6 @@ class JobSiteVisitRoutesTest extends TestCase
             JobSiteVisit::SUPERVISOR_SHIFT_ID => $supervisorShift->id,
             JobSiteVisit::ADDRESS_ID => $jobSite->id,
             JobSiteVisit::IS_PRIMARY_ADDRESS => true,
-            JobSiteVisit::START_TIME => $this->faker->date(),
         ];
         $response = $this->post($apiCall, $data);
         $count = count(JobSiteVisit::all());
@@ -70,7 +69,6 @@ class JobSiteVisitRoutesTest extends TestCase
             JobSiteVisit::SUPERVISOR_SHIFT_ID => $supervisorShift->id,
             JobSiteVisit::ADDRESS_ID => $jobSiteSubAddress->id,
             JobSiteVisit::IS_PRIMARY_ADDRESS => false,
-            JobSiteVisit::START_TIME => $this->faker->date(),
         ];
         $response = $this->post($apiCall, $data);
         $count = count(JobSiteVisit::all());
@@ -108,6 +106,6 @@ class JobSiteVisitRoutesTest extends TestCase
             JobSiteVisit::ID => self::INVALID_ID,
         ];
         $response = $this->post($apiCall, $data);
-        $response->assertJsonValidationErrors([JobSiteVisit::SUPERVISOR_SHIFT_ID, JobSiteVisit::IS_PRIMARY_ADDRESS, JobSiteVisit::START_TIME, JobSiteVisit::ADDRESS_ID]);
+        $response->assertJsonValidationErrors([JobSiteVisit::SUPERVISOR_SHIFT_ID, JobSiteVisit::IS_PRIMARY_ADDRESS, JobSiteVisit::ADDRESS_ID]);
     }
 }
